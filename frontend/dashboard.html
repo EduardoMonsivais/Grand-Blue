@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel de Salud</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="./images/Health.jpg" type="image/jpeg">
+<meta name="theme-color" content="#2c3e50" />
+
+</head>
+<body>
+  <div class="container">
+  <h1 id="welcomeMessage">Bienvenido 👋</h1>
+  <p>Tu ritmo cardíaco en tiempo real:</p>
+  <div class="cardio-box">
+    <h2 id="heartbeat">-- bpm</h2>
+    <div class="pulse"></div>
+  </div>
+  <p id="timestamp"></p>
+
+  <button id="logoutBtn" class="logout-button">Cerrar sesión</button>
+</div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
