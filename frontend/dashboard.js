@@ -1,10 +1,11 @@
 const API_BASE_URL = 'https://health-sen.onrender.com';
+const token = localStorage.getItem('token');
 
 async function checkSession() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       method: 'GET',
-      credentials: 'include'
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (!res.ok) throw new Error('Sesión no válida');
@@ -23,7 +24,9 @@ checkSession();
 
 async function loadLastBPM() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/heart/latest`);
+    const res = await fetch(`${API_BASE_URL}/api/heart/latest`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
     if (!res.ok) throw new Error("No se pudo obtener los datos");
 
@@ -43,16 +46,8 @@ async function loadLastBPM() {
 setInterval(loadLastBPM, 2000);
 loadLastBPM();
 
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-  const res = await fetch(`${API_BASE_URL}/api/logout`, {
-    method: 'POST',
-    credentials: 'include'
-  });
-
-  if (res.ok) {
-    localStorage.removeItem('username');
-    window.location.href = 'index.html';
-  } else {
-    console.error('Error al cerrar sesión');
-  }
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('username');
+  localStorage.removeItem('token');
+  window.location.href = 'index.html';
 });

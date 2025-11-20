@@ -41,14 +41,19 @@ const login = async (req, res) => {
       maxAge: 1000 * 60 * 60 * 24 * 7
     });
 
-    res.status(200).json({ message: 'Inicio de sesión exitoso', user: user.name });
+    // ✅ Devolvemos también el token en el JSON
+    res.status(200).json({ 
+      message: 'Inicio de sesión exitoso', 
+      user: user.name, 
+      token 
+    });
   } catch (error) {
     res.status(500).json({ error: 'Error del servidor durante el inicio de sesión' });
   }
 };
 
 const verifySession = (req, res) => {
-  const token = req.cookies.token;
+  const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
   if (!token) return res.status(401).json({ authenticated: false });
 
   try {
