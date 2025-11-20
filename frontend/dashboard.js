@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000'; 
+const API_BASE_URL = 'http://localhost:3000';
 
 async function checkSession() {
   try {
@@ -7,14 +7,12 @@ async function checkSession() {
       credentials: 'include'
     });
 
-    const data = await res.json();
-    console.log('Respuesta de /api/profile:', res.status, data);
+    if (!res.ok) throw new Error('Sesión no válida');
 
-    if (res.ok) {
-      document.getElementById('welcomeMessage').textContent = `Bienvenido, ${data.message.split(' ')[1]} 👋`;
-    } else {
-      window.location.href = 'index.html';
-    }
+    const data = await res.json();
+    document.getElementById('welcomeMessage').textContent =
+      `Bienvenido, ${data.message.split(' ')[1]} 👋`;
+
   } catch (err) {
     console.error('Error en checkSession:', err);
     window.location.href = 'index.html';
@@ -23,17 +21,30 @@ async function checkSession() {
 
 checkSession();
 
-function simulateHeartbeat() {
-  const bpm = Math.floor(Math.random() * (100 - 65 + 1)) + 65;
-  document.getElementById('heartbeat').textContent = `${bpm} bpm`;
+async function loadLastBPM() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/heart/latest`);
 
-  const now = new Date();
-  document.getElementById('timestamp').textContent =
-    `Última actualización: ${now.toLocaleTimeString()}`;
+    if (!res.ok) throw new Error("No se pudo obtener los datos");
+
+    const data = await res.json();
+
+    // Mostrar BPM
+    document.getElementById('heartbeat').textContent = `${data.bpm} bpm`;
+
+    // Mostrar hora
+    const time = new Date(data.timestamp);
+    document.getElementById('timestamp').textContent =
+      `Última actualización: ${time.toLocaleString()}`;
+
+  } catch (err) {
+    console.error("Error obteniendo BPM:", err);
+  }
 }
 
-setInterval(simulateHeartbeat, 3000);
-simulateHeartbeat();
+// Actualiza cada 2 segundos
+setInterval(loadLastBPM, 2000);
+loadLastBPM();
 
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   await fetch(`${API_BASE_URL}/api/logout`, {

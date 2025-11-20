@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { register, login } = require('../controllers/authController');
+const { register, login, verifySession } = require('../controllers/authController');
 const verifyToken = require('../middleware/authMiddleware');
 
 router.post('/register', register);
 router.post('/login', login);
+router.get('/verify', verifySession); // ✅ nueva ruta para verificar sesión
 
 router.get('/profile', verifyToken, (req, res) => {
   res.status(200).json({ message: `Hola ${req.user.name}, tu sesión está activa.` });

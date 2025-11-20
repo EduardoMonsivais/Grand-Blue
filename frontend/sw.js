@@ -41,7 +41,6 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activación: elimina cachés antiguas
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -57,7 +56,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Intercepta peticiones GET y responde desde red o caché
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 

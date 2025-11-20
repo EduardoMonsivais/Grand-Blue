@@ -1,5 +1,20 @@
 const API_BASE_URL = 'http://localhost:3000';
 
+// 🔐 Verificar sesión al cargar la página
+fetch(`${API_BASE_URL}/api/verify`, {
+  method: 'GET',
+  credentials: 'include'
+})
+  .then(async res => {
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.authenticated) {
+      window.location.href = 'dashboard.html';
+    }
+  })
+  .catch(err => console.error('Error al verificar sesión:', err));
+
+// 🧾 Manejar el envío del formulario de login
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -20,9 +35,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     if (res.ok) {
       message.style.color = 'green';
       message.textContent = `Bienvenido, ${data.user}!`;
-
       localStorage.setItem('username', data.user);
-
       setTimeout(() => {
         window.location.href = 'dashboard.html';
       }, 1000);

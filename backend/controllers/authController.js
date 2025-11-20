@@ -3,8 +3,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const register = async (req, res) => {
-  console.log('Registro recibido:', req.body); 
-
   const { name, email, password } = req.body;
 
   try {
@@ -16,7 +14,6 @@ const register = async (req, res) => {
 
     res.status(201).json({ message: 'Usuario registrado exitosamente' });
   } catch (error) {
-    console.error('Error en el registro:', error.message, error.stack); 
     res.status(500).json({ error: 'Error del servidor durante el registro' });
   }
 };
@@ -34,22 +31,32 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, name: user.name },
       process.env.JWT_SECRET,
-      { expiresIn: '2h' }
+      { expiresIn: '7d' }
     );
 
-    res
-      .cookie('token', token, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'Lax',
-        maxAge: 2 * 60 * 60 * 1000
-      })
-      .status(200)
-      .json({ message: 'Inicio de sesión exitoso', user: user.name });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, // ✅ en desarrollo local
+      sameSite: "Lax", // ✅ permite cookies entre puertos distintos
+      maxAge: 1000 * 60 * 60 * 24 * 7
+    });
+
+    res.status(200).json({ message: 'Inicio de sesión exitoso', user: user.name });
   } catch (error) {
-    console.error('Error en el login:', error.message, error.stack); 
     res.status(500).json({ error: 'Error del servidor durante el inicio de sesión' });
   }
 };
 
-module.exports = { register, login };
+const verifySession = (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ authenticated: false });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    res.status(200).json({ authenticated: true, user: decoded.name });
+  } catch (err) {
+    res.status(401).json({ authenticated: false });
+  }
+};
+
+module.exports = { register, login, verifySession };
