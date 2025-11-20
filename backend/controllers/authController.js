@@ -36,8 +36,8 @@ const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // ✅ en desarrollo local
-      sameSite: "Lax", // ✅ permite cookies entre puertos distintos
+      secure: true,
+      sameSite: "None", 
       maxAge: 1000 * 60 * 60 * 24 * 7
     });
 
