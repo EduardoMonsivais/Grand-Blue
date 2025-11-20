@@ -4,7 +4,8 @@ const token = localStorage.getItem('token');
 if (token) {
   fetch(`${API_BASE_URL}/api/verify`, {
     method: 'GET',
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: 'include'
   })
     .then(async res => {
       if (!res.ok) return;
@@ -16,7 +17,6 @@ if (token) {
     .catch(err => console.error('Error al verificar sesión:', err));
 }
 
-// 🟢 Login
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -28,6 +28,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const res = await fetch(`${API_BASE_URL}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email, password })
     });
 
@@ -37,7 +38,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       message.style.color = 'green';
       message.textContent = `Bienvenido, ${data.user}!`;
 
-      // ✅ Guardamos usuario y token en localStorage
       localStorage.setItem('username', data.user);
       localStorage.setItem('token', data.token);
 

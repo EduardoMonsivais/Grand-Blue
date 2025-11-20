@@ -34,6 +34,7 @@ const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    // ✅ Cookie para web
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
@@ -41,7 +42,7 @@ const login = async (req, res) => {
       maxAge: 1000 * 60 * 60 * 24 * 7
     });
 
-    // ✅ Devolvemos también el token en el JSON
+    // ✅ Token en JSON para móvil
     res.status(200).json({ 
       message: 'Inicio de sesión exitoso', 
       user: user.name, 
