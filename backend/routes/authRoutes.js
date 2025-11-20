@@ -12,7 +12,11 @@ router.get('/profile', verifyToken, (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-  res.clearCookie('token');
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+  });
   res.json({ message: 'Sesión cerrada correctamente' });
 });
 

@@ -44,11 +44,15 @@ setInterval(loadLastBPM, 2000);
 loadLastBPM();
 
 document.getElementById('logoutBtn').addEventListener('click', async () => {
-  await fetch(`${API_BASE_URL}/api/logout`, {
+  const res = await fetch(`${API_BASE_URL}/api/logout`, {
     method: 'POST',
     credentials: 'include'
   });
 
-  localStorage.removeItem('username');
-  window.location.href = 'index.html';
+  if (res.ok) {
+    localStorage.removeItem('username');
+    window.location.href = 'index.html';
+  } else {
+    console.error('Error al cerrar sesión');
+  }
 });

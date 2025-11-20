@@ -45,6 +45,68 @@
   </header>
 
   <main>
+    <!-- Producto -->
+    <section id="producto" class="contenedor sobre-nosotros">
+      <h2 class="titulo">Nuestro Producto</h2>
+      <div class="contenedor-sobre-nosotros">
+        <img src="images/Health.jpg" class="imagen-about-us" alt="Health Sen App">
+        <div class="contenido-textos">
+          <h3><span>1</span> Aplicación para ver el ritmo cardiaco</h3>
+          <p>Con nuestra aplicación móvil y web podrás ver la información sobre nuestros seres queridos de edad avanzada para poder saber cómo se encuentran y si están en una situación de riesgo.</p>
+
+          <h3><span>2</span> Objetivo</h3>
+          <p>Proporcionar un apoyo a los usuarios de silla de ruedas o adultos mayores, garantizando su seguridad y comodidad fuera de casa.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metas -->
+    <section id="metas" class="about-services">
+      <div class="contenedor">
+        <h2 class="titulo">Nuestras Metas</h2>
+        <div class="servicio-cont">
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Meta 1">
+            <h3>META 1</h3>
+            <p>Seguir mejorando nuestro producto para añadirle más funciones.</p>
+          </div>
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Meta 2">
+            <h3>META 2</h3>
+            <p>Proteger a la gente mayor y brindar tranquilidad a sus familias.</p>
+          </div>
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Meta 3">
+            <h3>META 3</h3>
+            <p>Garantizar que toda la información esté segura y accesible.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Justificación -->
+    <section id="justificacion" class="about-justify">
+      <div class="contenedor">
+        <h2 class="titulo">Justificación del Proyecto</h2>
+        <div class="servicio-justify">
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Razón del producto">
+            <h3>Razón del producto</h3>
+            <p>El enfoque en nuestro proyecto se debe a que en el día a día de la gente mayor, siempre existe el riesgo de complicaciones cardíacas. Nuestro producto busca garantizar que siempre haya alguien al tanto del ritmo cardiaco para actuar a tiempo ante cualquier cambio.</p>
+          </div>
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Apoyo a la gente mayor">
+            <h3>Apoyo a la gente mayor</h3>
+            <p>Gracias a la app, los usuarios podrán monitorear su ritmo cardiaco y recibir alertas en tiempo real, ayudándolos a mantener una vida saludable y segura.</p>
+          </div>
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Apoyo a las familias">
+            <h3>Apoyo a las familias</h3>
+            <p>Los familiares podrán ver desde la web cómo se encuentra la persona mayor y recibir notificaciones ante cualquier cambio, brindando tranquilidad y seguridad.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -65,6 +127,7 @@
     <h2 class="titulo-final">© 2025 Health Sen</h2>
   </footer>
 
+  <!-- 🔍 Verificación de sesión -->
   <script>
     const API_BASE_URL = 'https://health-sen.onrender.com';
 
@@ -73,7 +136,7 @@
       credentials: 'include'
     })
       .then(async res => {
-        if (!res.ok) return;
+        if (!res.ok) return; 
         const data = await res.json();
         if (data.authenticated) {
           window.location.href = 'dashboard.html';
