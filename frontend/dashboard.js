@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://health-sen.onrender.com';
 
 async function checkSession() {
   try {
@@ -29,10 +29,8 @@ async function loadLastBPM() {
 
     const data = await res.json();
 
-    // Mostrar BPM
     document.getElementById('heartbeat').textContent = `${data.bpm} bpm`;
 
-    // Mostrar hora
     const time = new Date(data.timestamp);
     document.getElementById('timestamp').textContent =
       `Última actualización: ${time.toLocaleString()}`;
@@ -42,7 +40,6 @@ async function loadLastBPM() {
   }
 }
 
-// Actualiza cada 2 segundos
 setInterval(loadLastBPM, 2000);
 loadLastBPM();
 

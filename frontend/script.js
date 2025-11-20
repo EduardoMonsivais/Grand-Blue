@@ -1,6 +1,5 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://health-sen.onrender.com';
 
-// 🔐 Verificar sesión al cargar la página
 fetch(`${API_BASE_URL}/api/verify`, {
   method: 'GET',
   credentials: 'include'
@@ -14,7 +13,6 @@ fetch(`${API_BASE_URL}/api/verify`, {
   })
   .catch(err => console.error('Error al verificar sesión:', err));
 
-// 🧾 Manejar el envío del formulario de login
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 

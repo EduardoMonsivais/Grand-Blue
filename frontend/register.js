@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://health-sen.onrender.com';
 let db;
 
 const request = indexedDB.open('offlineDB', 1);
@@ -12,7 +12,6 @@ request.onupgradeneeded = event => {
 
 request.onsuccess = event => {
   db = event.target.result;
-  //Intentar sincronizar al cargar si hay conexión
   if (navigator.onLine) syncPendingUsers();
 };
 
@@ -20,14 +19,12 @@ request.onerror = () => {
   console.error('Error al abrir IndexedDB');
 };
 
-//Guardar usuario localmente
 function saveUserOffline(userData) {
   const tx = db.transaction(['pendingUsers'], 'readwrite');
   const store = tx.objectStore('pendingUsers');
   store.put(userData);
 }
 
-//Enviar al servidor
 async function sendToServer(userData, showMessage = true) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/register`, {
@@ -64,7 +61,6 @@ async function sendToServer(userData, showMessage = true) {
   }
 }
 
-//Sincronizar usuarios pendientes
 function syncPendingUsers() {
   const tx = db.transaction(['pendingUsers'], 'readonly');
   const store = tx.objectStore('pendingUsers');
@@ -79,7 +75,6 @@ function syncPendingUsers() {
   };
 }
 
-//Detectar reconexión
 window.addEventListener('online', syncPendingUsers);
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
