@@ -26,16 +26,17 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// 📡 Rutas API primero
+app.use('/api', authRoutes);
+app.use('/api/heart', heartRoutes);
+
 // 🧭 Sirve el frontend si está incluido en el mismo repo
 app.use(express.static(path.join(__dirname, 'frontend')));
 
+// ⚠️ Esta línea debe ir al final para no interferir con las rutas API
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
-
-// 📡 Rutas API
-app.use('/api', authRoutes);
-app.use('/api/heart', heartRoutes);
 
 // 🚀 Conexión a MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, {

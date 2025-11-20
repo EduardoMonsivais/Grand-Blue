@@ -5,7 +5,7 @@ const verifyToken = require('../middleware/authMiddleware');
 
 router.post('/register', register);
 router.post('/login', login);
-router.get('/verify', verifySession); // ✅ nueva ruta para verificar sesión
+router.get('/verify', verifySession); 
 
 router.get('/profile', verifyToken, (req, res) => {
   res.status(200).json({ message: `Hola ${req.user.name}, tu sesión está activa.` });
