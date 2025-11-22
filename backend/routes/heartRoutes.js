@@ -9,8 +9,11 @@ const {
 const router = express.Router();
 
 router.post('/', receiveBPM);
+
 router.get('/live', sendLiveBPM);
+
 router.get('/history', getHistory);
-router.get('/latest', getLatest); 
+
+router.get('/latest', getLatest);
 
 module.exports = router;

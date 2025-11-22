@@ -1,12 +1,13 @@
 const API_BASE_URL = 'https://health-sen.onrender.com';
 const token = localStorage.getItem('token');
 
+// ✅ Verificación de sesión (cookie o token)
 async function checkSession() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       method: 'GET',
-      credentials: 'include', 
-      headers: token ? { Authorization: `Bearer ${token}` } : {} 
+      credentials: 'include', // para web (cookies)
+      headers: token ? { Authorization: `Bearer ${token}` } : {} // para móvil (token)
     });
 
     if (!res.ok) throw new Error('Sesión no válida');
@@ -23,36 +24,37 @@ async function checkSession() {
 
 checkSession();
 
-async function loadLastBPM() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/heart/latest`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
+// ✅ Tiempo real con SSE
+function initLiveBPM() {
+  const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live`);
 
-    if (!res.ok) throw new Error("No se pudo obtener los datos");
-
-    const data = await res.json();
+  eventSource.onmessage = (event) => {
+    const data = JSON.parse(event.data);
 
     document.getElementById('heartbeat').textContent = `${data.bpm} bpm`;
 
     const time = new Date(data.timestamp);
     document.getElementById('timestamp').textContent =
       `Última actualización: ${time.toLocaleString()}`;
+  };
 
-  } catch (err) {
-    console.error("Error obteniendo BPM:", err);
-  }
+  eventSource.onerror = (err) => {
+    console.error("Error en SSE:", err);
+    // Si falla, puedes reconectar o mostrar un mensaje
+  };
 }
 
-setInterval(loadLastBPM, 2000);
-loadLastBPM();
+initLiveBPM();
 
+// ✅ Logout híbrido
 document.getElementById('logoutBtn').addEventListener('click', async () => {
+  // Borra cookie en web
   await fetch(`${API_BASE_URL}/api/logout`, {
     method: 'POST',
     credentials: 'include'
   });
 
+  // Borra token en móvil
   localStorage.removeItem('username');
   localStorage.removeItem('token');
 

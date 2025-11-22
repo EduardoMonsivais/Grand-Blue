@@ -3,18 +3,20 @@ const Heart = require('../models/HeartModel');
 let lastHeartRate = { bpm: 0, timestamp: Date.now() };
 let sseClients = [];
 
+// 📥 Recibir BPM desde ESP32
 exports.receiveBPM = async (req, res) => {
   try {
-    const { bpm } = req.body;
-
+    const { bpm, timestamp } = req.body;
     if (!bpm) return res.status(400).json({ error: 'BPM es requerido' });
 
-    // Guardar en BD
-    const record = await Heart.create({ bpm });
+    const record = await Heart.create({
+      bpm,
+      timestamp: timestamp ? new Date(Number(timestamp)) : new Date()
+    });
 
     lastHeartRate = {
       bpm,
-      timestamp: Date.now()
+      timestamp: record.timestamp
     };
 
     console.log("💓 Nuevo BPM recibido:", lastHeartRate);
@@ -65,7 +67,6 @@ exports.getHistory = async (req, res) => {
   }
 };
 
-// ✅ Nueva ruta para el dashboard
 exports.getLatest = async (req, res) => {
   try {
     const latest = await Heart.findOne().sort({ timestamp: -1 });
