@@ -19,17 +19,22 @@ if (!process.env.MONGO_URI) {
   console.log("✅ URI detectada:", process.env.MONGO_URI);
 }
 
+// 🧩 Middlewares
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true
 }));
-
 app.use(express.json());
 app.use(cookieParser());
 
 // 📡 Rutas API primero
 app.use('/api', authRoutes);        // /api/login, /api/register, etc.
 app.use('/api/heart', heartRoutes); // /api/heart, /api/heart/live, etc.
+
+// 🛡️ Manejador global de rutas no encontradas
+app.use((req, res) => {
+  res.status(404).json({ error: 'Ruta no encontrada' });
+});
 
 // 🧭 Sirve el frontend si existe
 const frontendPath = path.join(__dirname, 'frontend', 'index.html');
@@ -39,11 +44,6 @@ if (fs.existsSync(frontendPath)) {
     res.sendFile(frontendPath);
   });
 }
-
-// 🛡️ Manejador global de rutas no encontradas
-app.use((req, res) => {
-  res.status(404).json({ error: 'Ruta no encontrada' });
-});
 
 // 🚀 Conexión a MongoDB Atlas 
 mongoose.connect(process.env.MONGO_URI, {
