@@ -23,9 +23,10 @@ async function checkSession() {
 
 checkSession();
 
-// ✅ Tiempo real con SSE
+// ✅ Tiempo real con SSE (filtrado por usuario)
 function initLiveBPM() {
-  const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live`);
+  // 🔑 withCredentials: true para enviar cookie/token
+  const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live`, { withCredentials: true });
 
   eventSource.onmessage = (event) => {
     const data = JSON.parse(event.data);

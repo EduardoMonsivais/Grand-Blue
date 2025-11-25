@@ -1,6 +1,5 @@
 const Heart = require('../models/HeartModel');
 
-let lastHeartRate = { bpm: 0, timestamp: Date.now() };
 let sseClients = [];
 
 // 📥 Recibir BPM desde ESP32
@@ -23,14 +22,14 @@ exports.receiveBPM = async (req, res) => {
       userId
     });
 
-    lastHeartRate = {
-      bpm,
-      timestamp: record.timestamp
-    };
+    console.log("💓 Nuevo BPM recibido:", record);
 
-    sseClients.forEach(client => {
-      client.res.write(`data: ${JSON.stringify(lastHeartRate)}\n\n`);
-    });
+    // 🔑 Notificar solo a los clientes SSE del mismo usuario
+    sseClients
+      .filter(c => c.userId.toString() === userId.toString())
+      .forEach(client => {
+        client.res.write(`data: ${JSON.stringify(record)}\n\n`);
+      });
 
     return res.status(201).json({
       message: "BPM recibido",
@@ -43,21 +42,32 @@ exports.receiveBPM = async (req, res) => {
   }
 };
 
-// 🔴 SSE puede quedar público o protegerse si lo deseas
-exports.sendLiveBPM = (req, res) => {
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  res.flushHeaders();
+// 🔴 SSE por usuario
+exports.sendLiveBPM = async (req, res) => {
+  try {
+    const userId = req.user.id; // viene del token
 
-  res.write(`data: ${JSON.stringify(lastHeartRate)}\n\n`);
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders();
 
-  const client = { id: Date.now(), res };
-  sseClients.push(client);
+    // 🔑 Enviar el último BPM del usuario
+    const latest = await Heart.findOne({ userId }).sort({ timestamp: -1 });
+    if (latest) {
+      res.write(`data: ${JSON.stringify(latest)}\n\n`);
+    }
 
-  req.on("close", () => {
-    sseClients = sseClients.filter(c => c.id !== client.id);
-  });
+    const client = { id: Date.now(), res, userId };
+    sseClients.push(client);
+
+    req.on("close", () => {
+      sseClients = sseClients.filter(c => c.id !== client.id);
+    });
+  } catch (err) {
+    console.error("❌ Error en sendLiveBPM:", err);
+    res.status(500).end();
+  }
 };
 
 // 📜 Historial privado por usuario

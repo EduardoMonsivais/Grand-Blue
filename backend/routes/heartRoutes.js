@@ -9,9 +9,16 @@ const {
 
 const router = express.Router();
 
+// 📥 Guardar BPM (solo autenticados)
 router.post('/', verifyToken, receiveBPM);
-router.get('/live', sendLiveBPM); // opcional: puedes protegerlo también
+
+// 📡 SSE en vivo (solo autenticados, así se filtra por usuario)
+router.get('/live', verifyToken, sendLiveBPM);
+
+// 📜 Historial privado del usuario
 router.get('/history', verifyToken, getHistory);
+
+// 🕒 Último BPM del usuario
 router.get('/latest', verifyToken, getLatest);
 
 module.exports = router;
