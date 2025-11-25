@@ -31,6 +31,11 @@ app.use(cookieParser());
 app.use('/api', authRoutes);        // /api/login, /api/register, etc.
 app.use('/api/heart', heartRoutes); // /api/heart, /api/heart/live, etc.
 
+// 🧪 Ruta de diagnóstico para confirmar que Express responde
+app.post('/api/ping', (req, res) => {
+  res.json({ ok: true, msg: 'Express responde correctamente' });
+});
+
 // 🛡️ Manejador global de rutas no encontradas
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
