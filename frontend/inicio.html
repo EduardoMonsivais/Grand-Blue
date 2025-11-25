@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Health Sen</title>
+  <link rel="stylesheet" href="inicio.css" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="./images/Health.png" type="image/png">
+  <meta name="theme-color" content="#2c3e50" />
+</head>
+<body>
+  <a href="index.html" class="btn-volver">← Volver al inicio</a>
+  <div class="container">
+    <h1>Bienvenido de vuelta 👋</h1>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Correo" required />
+      <input type="password" id="password" placeholder="Contraseña" required minlength="6" />
+      <button type="submit">Iniciar Sesión</button>
+      <p id="message"></p>
+    </form>
+    <p>Aún no tienes una cuenta? <a href="register.html">Registrate</a></p>
+  </div>
+
+  <!-- ✅ Solo carga el script externo -->
+  <script src="script.js"></script>
+</body>
+</html>

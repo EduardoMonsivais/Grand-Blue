@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Sen</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="./images/Health.png" type="image/png">
+  <meta name="theme-color" content="#2c3e50" />
+</head>
+<body>
+
+  <header>
+    <nav>
+      <div class="logo">🩺 Health <span>Sen</span></div>
+      <div class="links">
+        <a href="#">Inicio</a>
+        <a href="#producto">Producto</a>
+        <a href="#metas">Metas</a>
+        <a href="#justificacion">Justificación</a>
+        <a href="https://www.facebook.com/profile.php?id=61556278896789" target="_blank">Contacto</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-text">
+        <h1>Tu salud es lo más importante</h1>
+        <p>Especialmente para los más grandes en el hogar ❤️</p>
+        <a href="#producto" class="btn">Conoce más</a>
+        <a href="inicio.html" class="btn btn-login">Iniciar sesión</a>
+      </div>
+
+      <div class="hero-img">
+        <img src="images/Health.jpg" alt="Aplicación Health Sen">
+      </div>
+    </section>
+
+    <div class="wave">
+      <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+        <path d="M0.00,49.98 C150.00,150.00 349.72,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z"
+              style="stroke: none; fill: #ffffff;"></path>
+      </svg>
+    </div>
+  </header>
+
+  <main>
+    <!-- Producto -->
+    <section id="producto" class="contenedor sobre-nosotros">
+      <h2 class="titulo">Nuestro Producto</h2>
+      <div class="contenedor-sobre-nosotros">
+        <img src="images/Health.jpg" class="imagen-about-us" alt="Health Sen App">
+        <div class="contenido-textos">
+          <h3><span>1</span> Aplicación para ver el ritmo cardiaco</h3>
+          <p>Con nuestra aplicación móvil y web podrás ver la información sobre nuestros seres queridos de edad avanzada para poder saber cómo se encuentran y si están en una situación de riesgo.</p>
+
+          <h3><span>2</span> Objetivo</h3>
+          <p>Proporcionar un apoyo a los usuarios de silla de ruedas o adultos mayores, garantizando su seguridad y comodidad fuera de casa.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metas -->
+    <section id="metas" class="about-services">
+      <div class="contenedor">
+        <h2 class="titulo">Nuestras Metas</h2>
+        <div class="servicio-cont">
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Meta 1">
+            <h3>META 1</h3>
+            <p>Seguir mejorando nuestro producto para añadirle más funciones.</p>
+          </div>
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Meta 2">
+            <h3>META 2</h3>
+            <p>Proteger a la gente mayor y brindar tranquilidad a sus familias.</p>
+          </div>
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Meta 3">
+            <h3>META 3</h3>
+            <p>Garantizar que toda la información esté segura y accesible.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Justificación -->
+    <section id="justificacion" class="about-justify">
+      <div class="contenedor">
+        <h2 class="titulo">Justificación del Proyecto</h2>
+        <div class="servicio-justify">
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Razón del producto">
+            <h3>Razón del producto</h3>
+            <p>El enfoque en nuestro proyecto se debe a que en el día a día de la gente mayor, siempre existe el riesgo de complicaciones cardíacas. Nuestro producto busca garantizar que siempre haya alguien al tanto del ritmo cardiaco para actuar a tiempo ante cualquier cambio.</p>
+          </div>
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Apoyo a la gente mayor">
+            <h3>Apoyo a la gente mayor</h3>
+            <p>Gracias a la app, los usuarios podrán monitorear su ritmo cardiaco y recibir alertas en tiempo real, ayudándolos a mantener una vida saludable y segura.</p>
+          </div>
+          <div class="servicio-ind">
+            <img src="images/Health.jpg" alt="Apoyo a las familias">
+            <h3>Apoyo a las familias</h3>
+            <p>Los familiares podrán ver desde la web cómo se encuentra la persona mayor y recibir notificaciones ante cualquier cambio, brindando tranquilidad y seguridad.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="contenedor-footer">
+      <div class="content-foo">
+        <h4>Teléfono</h4>
+        <p>81165474</p>
+      </div>
+      <div class="content-foo">
+        <h4>Correo</h4>
+        <p>chokokta198@gmail.com</p>
+      </div>
+      <div class="content-foo">
+        <h4>Redes Sociales</h4>
+        <p>@Health-Sen</p>
+      </div>
+    </div>
+    <h2 class="titulo-final">© 2025 Health Sen</h2>
+  </footer>
+
+  <!-- 🔍 Verificación de sesión -->
+  <script>
+    const API_BASE_URL = 'https://health-sen.onrender.com';
+
+    fetch(`${API_BASE_URL}/api/verify`, {
+      method: 'GET',
+      credentials: 'include'
+    })
+      .then(async res => {
+        if (!res.ok) return; 
+        const data = await res.json();
+        if (data.authenticated) {
+          window.location.href = 'dashboard.html';
+        }
+      })
+      .catch(err => console.error('Error al verificar sesión:', err));
+  </script>
+
+  <!-- ✅ Registro del Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('✅ Service Worker registrado:', reg.scope))
+          .catch(err => console.error('❌ Error al registrar el Service Worker:', err));
+      });
+    }
+  </script>
+
+</body>
+</html>
