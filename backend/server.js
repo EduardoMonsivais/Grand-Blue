@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const fs = require('fs');
 
 const authRoutes = require('./routes/authRoutes');
 const heartRoutes = require('./routes/heartRoutes');
@@ -30,13 +31,19 @@ app.use(cookieParser());
 app.use('/api', authRoutes);
 app.use('/api/heart', heartRoutes);
 
-// 🧭 Sirve el frontend si está incluido en el mismo repo
-app.use(express.static(path.join(__dirname, 'frontend')));
-
-// ⚠️ Esta línea debe ir al final para no interferir con las rutas API
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+// 🛡️ Protege rutas API no encontradas
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Ruta API no encontrada' });
 });
+
+// 🧭 Sirve el frontend si existe
+const frontendPath = path.join(__dirname, 'frontend', 'index.html');
+if (fs.existsSync(frontendPath)) {
+  app.use(express.static(path.join(__dirname, 'frontend')));
+  app.get('*', (req, res) => {
+    res.sendFile(frontendPath);
+  });
+}
 
 // 🚀 Conexión a MongoDB Atlas 
 mongoose.connect(process.env.MONGO_URI, {
