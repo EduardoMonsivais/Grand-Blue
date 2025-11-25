@@ -31,9 +31,12 @@ app.use(cookieParser());
 app.use('/api', authRoutes);
 app.use('/api/heart', heartRoutes);
 
-// 🛡️ Protege rutas API no encontradas
-app.use('/api', (req, res) => {
-  res.status(404).json({ error: 'Ruta API no encontrada' });
+// 🛡️ Manejo de rutas API no encontradas (sin bloquear rutas válidas)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'Ruta API no encontrada' });
+  }
+  next();
 });
 
 // 🧭 Sirve el frontend si existe
