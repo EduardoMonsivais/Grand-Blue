@@ -28,8 +28,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 // 📡 Rutas API primero
-app.use('/api', authRoutes);
-app.use('/api/heart', heartRoutes);
+app.use('/api', authRoutes);        // /api/login, /api/register, etc.
+app.use('/api/heart', heartRoutes); // /api/heart, /api/heart/live, etc.
 
 // 🛡️ Manejo de rutas API no encontradas (sin bloquear rutas válidas)
 app.use((req, res, next) => {
