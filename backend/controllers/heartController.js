@@ -7,6 +7,7 @@ let sseClients = [];
 exports.receiveBPM = async (req, res) => {
   try {
     const { bpm, timestamp } = req.body;
+    const userId = req.user.id;
 
     if (!bpm) return res.status(400).json({ error: 'BPM es requerido' });
 
@@ -18,15 +19,14 @@ exports.receiveBPM = async (req, res) => {
 
     const record = await Heart.create({
       bpm,
-      timestamp: parsedTimestamp
+      timestamp: parsedTimestamp,
+      userId
     });
 
     lastHeartRate = {
       bpm,
       timestamp: record.timestamp
     };
-
-    console.log("💓 Nuevo BPM recibido:", lastHeartRate);
 
     sseClients.forEach(client => {
       client.res.write(`data: ${JSON.stringify(lastHeartRate)}\n\n`);
@@ -43,6 +43,7 @@ exports.receiveBPM = async (req, res) => {
   }
 };
 
+// 🔴 SSE puede quedar público o protegerse si lo deseas
 exports.sendLiveBPM = (req, res) => {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -54,17 +55,16 @@ exports.sendLiveBPM = (req, res) => {
   const client = { id: Date.now(), res };
   sseClients.push(client);
 
-  console.log("🟢 Cliente conectado a SSE");
-
   req.on("close", () => {
-    console.log("🔴 Cliente desconectado de SSE");
     sseClients = sseClients.filter(c => c.id !== client.id);
   });
 };
 
+// 📜 Historial privado por usuario
 exports.getHistory = async (req, res) => {
   try {
-    const history = await Heart.find()
+    const userId = req.user.id;
+    const history = await Heart.find({ userId })
       .sort({ timestamp: -1 })
       .limit(50);
 
@@ -75,9 +75,11 @@ exports.getHistory = async (req, res) => {
   }
 };
 
+// 🕒 Último BPM del usuario
 exports.getLatest = async (req, res) => {
   try {
-    const latest = await Heart.findOne().sort({ timestamp: -1 });
+    const userId = req.user.id;
+    const latest = await Heart.findOne({ userId }).sort({ timestamp: -1 });
     if (!latest) return res.status(404).json({ error: 'No hay datos' });
     res.json(latest);
   } catch (error) {

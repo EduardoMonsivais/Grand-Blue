@@ -8,6 +8,11 @@ const HeartSchema = new mongoose.Schema({
   timestamp: {
     type: Date,
     default: Date.now
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 });
 
