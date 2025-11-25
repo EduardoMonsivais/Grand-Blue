@@ -31,14 +31,6 @@ app.use(cookieParser());
 app.use('/api', authRoutes);        // /api/login, /api/register, etc.
 app.use('/api/heart', heartRoutes); // /api/heart, /api/heart/live, etc.
 
-// 🛡️ Manejo de rutas API no encontradas (sin bloquear rutas válidas)
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ error: 'Ruta API no encontrada' });
-  }
-  next();
-});
-
 // 🧭 Sirve el frontend si existe
 const frontendPath = path.join(__dirname, 'frontend', 'index.html');
 if (fs.existsSync(frontendPath)) {
@@ -47,6 +39,11 @@ if (fs.existsSync(frontendPath)) {
     res.sendFile(frontendPath);
   });
 }
+
+// 🛡️ Manejador global de rutas no encontradas
+app.use((req, res) => {
+  res.status(404).json({ error: 'Ruta no encontrada' });
+});
 
 // 🚀 Conexión a MongoDB Atlas 
 mongoose.connect(process.env.MONGO_URI, {
