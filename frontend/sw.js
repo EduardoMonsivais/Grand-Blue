@@ -1,10 +1,9 @@
-const VERSION = '0.1';
+const VERSION = '0.2';
 const CACHE_NAME = `cache-${VERSION}`;
 
 const appshell = [
   '/index.html',
   '/register.html',
-  '/dashboard.html',
   '/inicio.html',
   '/styles.css',
   '/register.css',
@@ -12,7 +11,8 @@ const appshell = [
   '/inicio.css',
   '/script.js',
   '/register.js',
-  '/dashboard.js'
+  '/dashboard.js',
+  '/images/Health.png'
 ];
 
 self.addEventListener("install", (event) => {
@@ -57,16 +57,33 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+
+  // ❌ No interceptar SSE ni APIs dinámicas
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname === '/dashboard.html' ||
+    event.request.headers.get('accept') === 'text/event-stream'
+  ) {
+    return; // dejar que el navegador lo maneje
+  }
+
   if (event.request.method !== "GET") return;
 
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, networkResponse.clone());
-          return networkResponse;
-        });
-      })
-      .catch(() => caches.match(event.request))
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(event.request)
+        .then((networkResponse) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        })
+        .catch(() => caches.match('/index.html')); // fallback si todo falla
+    })
   );
 });
