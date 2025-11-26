@@ -1,13 +1,22 @@
 const API_BASE_URL = 'https://health-sen.onrender.com';
 const token = localStorage.getItem('token');
 
-// ✅ Verificación de sesión
+// 🔍 Mostrar token en consola al cargar el dashboard
+console.log("Token actual en localStorage:", token);
+
+// ✅ Verificación de sesión (rápida y no bloqueante)
 async function checkSession() {
+  if (!token) {
+    console.warn("No hay token en localStorage, redirigiendo...");
+    window.location.href = 'index.html';
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       method: 'GET',
       credentials: 'include',
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (!res.ok) throw new Error('Sesión no válida');
@@ -17,15 +26,16 @@ async function checkSession() {
       `Bienvenido, ${data.message.split(' ')[1]} 👋`;
   } catch (err) {
     console.error('Error en checkSession:', err);
+    // 🔑 Redirigir rápido si falla
     window.location.href = 'index.html';
   }
 }
 
+// 🚀 Ejecutar sin bloquear la carga inicial
 checkSession();
 
 // ✅ Tiempo real con SSE (filtrado por usuario)
 function initLiveBPM() {
-  // 🔑 withCredentials: true para enviar cookie/token
   const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live`, { withCredentials: true });
 
   eventSource.onmessage = (event) => {
@@ -39,6 +49,8 @@ function initLiveBPM() {
 
   eventSource.onerror = (err) => {
     console.error("Error en SSE:", err);
+    // 🔑 Cerrar conexión si falla para evitar que quede colgado
+    eventSource.close();
   };
 }
 
