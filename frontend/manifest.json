@@ -3,19 +3,24 @@
   "short_name": "HealthSen",
   "id": "/",
   "start_url": "/dashboard.html",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#2c3e50",
+  "description": "Monitorea tu ritmo cardíaco en tiempo real con Health Sen.",
   "icons": [
     {
       "src": "images/Corazon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "images/Corazon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
