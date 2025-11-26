@@ -9,11 +9,35 @@ const register = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ error: 'El correo ya está registrado' });
 
-    const newUser = new User({ name, email, password });
+    // 🔑 Hashear contraseña antes de guardar
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
 
-    res.status(201).json({ message: 'Usuario registrado exitosamente' });
+    // 🔑 Generar token inmediatamente al registrarse
+    const token = jwt.sign(
+      { id: newUser._id, name: newUser.name },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // 🔑 Guardar token en cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 1000 * 60 * 60 * 24 * 7
+    });
+
+    // 🔑 Devolver token también en JSON
+    res.status(201).json({
+      message: 'Usuario registrado exitosamente',
+      user: newUser.name,
+      token
+    });
   } catch (error) {
+    console.error("❌ Error en register:", error);
     res.status(500).json({ error: 'Error del servidor durante el registro' });
   }
 };
@@ -38,17 +62,18 @@ const login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "None", 
+      sameSite: "None",
       maxAge: 1000 * 60 * 60 * 24 * 7
     });
 
     // ✅ Token en JSON para móvil
-    res.status(200).json({ 
-      message: 'Inicio de sesión exitoso', 
-      user: user.name, 
-      token 
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso',
+      user: user.name,
+      token
     });
   } catch (error) {
+    console.error("❌ Error en login:", error);
     res.status(500).json({ error: 'Error del servidor durante el inicio de sesión' });
   }
 };
