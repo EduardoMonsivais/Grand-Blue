@@ -1,4 +1,4 @@
-const VERSION = '0.2';
+const VERSION = '0.3';
 const CACHE_NAME = `cache-${VERSION}`;
 
 const appshell = [
@@ -59,13 +59,13 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // ❌ No interceptar SSE ni APIs dinámicas
+  // ❌ No interceptar APIs ni SSE ni dashboard.html
   if (
     url.pathname.startsWith('/api/') ||
     url.pathname === '/dashboard.html' ||
     event.request.headers.get('accept') === 'text/event-stream'
   ) {
-    return; // dejar que el navegador lo maneje
+    return; // dejar que el navegador lo maneje directamente
   }
 
   if (event.request.method !== "GET") return;
@@ -83,7 +83,12 @@ self.addEventListener("fetch", (event) => {
             return networkResponse;
           });
         })
-        .catch(() => caches.match('/index.html')); // fallback si todo falla
+        .catch(() => {
+          // Fallback solo para HTML
+          if (event.request.headers.get("accept")?.includes("text/html")) {
+            return caches.match('/index.html');
+          }
+        });
     })
   );
 });
