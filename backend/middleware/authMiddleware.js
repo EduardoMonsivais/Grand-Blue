@@ -1,20 +1,22 @@
 const jwt = require('jsonwebtoken');
 
-const verifyToken = (req, res, next) => {
-  const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
+function verifyToken(req, res, next) {
+  const token =
+    req.cookies.token ||
+    (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]) ||
+    req.query.token;
 
   if (!token) {
-    return res.status(401).json({ error: 'Token no proporcionado' });
+    return res.status(401).json({ error: 'No se proporcionó token' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; 
+    req.user = decoded;
     next();
   } catch (err) {
-    console.error('Error al verificar token:', err.message);
-    res.status(403).json({ error: 'Token inválido o expirado' });
+    return res.status(401).json({ error: 'Token inválido o expirado' });
   }
-};
+}
 
 module.exports = verifyToken;

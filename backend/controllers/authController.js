@@ -13,14 +13,12 @@ const register = async (req, res) => {
     const newUser = new User({ name, email, password });
     await newUser.save();
 
-    // 🔑 Generar token inmediatamente al registrarse
     const token = jwt.sign(
       { id: newUser._id, name: newUser.name },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // 🔑 Guardar token en cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
@@ -28,7 +26,6 @@ const register = async (req, res) => {
       maxAge: 1000 * 60 * 60 * 24 * 7
     });
 
-    // 🔑 Devolver token también en JSON
     res.status(201).json({
       message: 'Usuario registrado exitosamente',
       user: newUser.name,
@@ -47,7 +44,6 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: 'Correo no encontrado' });
 
-    // ✅ Comparar contraseña ingresada con el hash guardado
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return res.status(401).json({ error: 'Contraseña incorrecta' });
 
@@ -57,7 +53,6 @@ const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // ✅ Cookie para web
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
@@ -65,7 +60,6 @@ const login = async (req, res) => {
       maxAge: 1000 * 60 * 60 * 24 * 7
     });
 
-    // ✅ Token en JSON para móvil
     res.status(200).json({
       message: 'Inicio de sesión exitoso',
       user: user.name,
@@ -78,7 +72,7 @@ const login = async (req, res) => {
 };
 
 const verifySession = (req, res) => {
-  const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
+  const token = req.cookies.token || req.headers['authorization']?.split(' ')[1] || req.query.token;
   if (!token) return res.status(401).json({ authenticated: false });
 
   try {

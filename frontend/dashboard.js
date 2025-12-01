@@ -1,10 +1,8 @@
 const API_BASE_URL = 'https://health-sen.onrender.com';
 const token = localStorage.getItem('token');
 
-// 🔍 Mostrar token en consola al cargar el dashboard
 console.log("Token actual en localStorage:", token);
 
-// ✅ Verificación de sesión (rápida y no bloqueante)
 async function checkSession() {
   if (!token) {
     console.warn("No hay token en localStorage, redirigiendo...");
@@ -15,7 +13,6 @@ async function checkSession() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       method: 'GET',
-      credentials: 'include',
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -26,17 +23,15 @@ async function checkSession() {
       `Bienvenido, ${data.message.split(' ')[1]} 👋`;
   } catch (err) {
     console.error('Error en checkSession:', err);
-    // 🔑 Redirigir rápido si falla
     window.location.href = 'index.html';
   }
 }
 
-// 🚀 Ejecutar sin bloquear la carga inicial
 checkSession();
 
-// ✅ Tiempo real con SSE (filtrado por usuario)
+// ✅ Tiempo real con SSE (token en URL para móvil)
 function initLiveBPM() {
-  const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live`, { withCredentials: true });
+  const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live?token=${token}`);
 
   eventSource.onmessage = (event) => {
     const data = JSON.parse(event.data);
@@ -49,35 +44,26 @@ function initLiveBPM() {
 
   eventSource.onerror = (err) => {
     console.error("Error en SSE:", err);
-    // 🔑 Cerrar conexión si falla para evitar que quede colgado
     eventSource.close();
   };
 }
 
 initLiveBPM();
 
-// ✅ Logout híbrido
 document.getElementById('logoutBtn').addEventListener('click', async () => {
-  await fetch(`${API_BASE_URL}/api/logout`, {
-    method: 'POST',
-    credentials: 'include'
-  });
-
+  await fetch(`${API_BASE_URL}/api/logout`, { method: 'POST' });
   localStorage.removeItem('username');
   localStorage.removeItem('token');
-
   window.location.href = 'index.html';
 });
 
-// 🚀 Función de prueba: enviar BPM manualmente
 async function sendBPM(bpm) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart`, {
       method: 'POST',
-      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({ bpm })
     });
@@ -90,15 +76,11 @@ async function sendBPM(bpm) {
   }
 }
 
-// 🚀 Función de prueba: cargar historial del usuario
 async function loadHistory() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
       method: 'GET',
-      credentials: 'include',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     const history = await res.json();
