@@ -1,6 +1,6 @@
 const User = require('../models/userModel');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -9,10 +9,8 @@ const register = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ error: 'El correo ya está registrado' });
 
-    // 🔑 Hashear contraseña antes de guardar
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({ name, email, password: hashedPassword });
+    // 🚫 No hasheamos aquí, el modelo lo hace automáticamente
+    const newUser = new User({ name, email, password });
     await newUser.save();
 
     // 🔑 Generar token inmediatamente al registrarse
@@ -49,6 +47,7 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: 'Correo no encontrado' });
 
+    // ✅ Comparar contraseña ingresada con el hash guardado
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return res.status(401).json({ error: 'Contraseña incorrecta' });
 
