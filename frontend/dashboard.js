@@ -100,3 +100,56 @@ async function loadHistory() {
     console.error('Error cargando historial:', err);
   }
 }
+
+// ✅ Gráfica de promedio diario con Chart.js
+async function loadChart() {
+  document.getElementById('dailyChart').style.display = 'block';
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const history = await res.json();
+
+    // Agrupar por fecha
+    const grouped = {};
+    history.forEach(h => {
+      const date = new Date(h.timestamp).toLocaleDateString();
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push(h.bpm);
+    });
+
+    // Calcular promedio por día
+    const labels = Object.keys(grouped);
+    const data = labels.map(date => {
+      const values = grouped[date];
+      const avg = values.reduce((a, b) => a + b, 0) / values.length;
+      return Math.round(avg);
+    });
+
+    // Colores por rango
+    const bgColors = data.map(bpm =>
+      bpm < 60 || bpm > 100 ? 'rgba(231, 76, 60, 0.7)' : 'rgba(46, 204, 113, 0.7)'
+    );
+
+    // Renderizar gráfica
+    new Chart(document.getElementById('bpmChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Promedio BPM',
+          data,
+          backgroundColor: bgColors
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Error cargando gráfica:', err);
+  }
+}

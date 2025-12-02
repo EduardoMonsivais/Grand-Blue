@@ -8,8 +8,23 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="./images/Health.jpg" type="image/jpeg">
   <meta name="theme-color" content="#2c3e50" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <!-- ☰ Icono de menú -->
+  <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+  <!-- Menú lateral -->
+  <div class="side-menu" id="sideMenu">
+    <h2>Opciones</h2>
+    <ul>
+      <li onclick="showProfile()">Perfil</li>
+      <li onclick="loadHistory()">Historial</li>
+      <li onclick="loadChart()">Gráfica BPM</li>
+      <li onclick="logout()">Cerrar sesión</li>
+    </ul>
+  </div>
+
   <div class="container">
     <h1 id="welcomeMessage">Bienvenido 👋</h1>
     <p>Tu ritmo cardíaco en tiempo real:</p>
@@ -19,12 +34,17 @@
     </div>
     <p id="timestamp"></p>
 
-    <!-- Botones de prueba -->
-    <div class="test-section">
-      <button onclick="sendBPM(88)">Enviar BPM de prueba</button>
-      <button onclick="loadHistory()">Ver historial</button>
-      <ul id="historyList"></ul>
-    </div>
+    <!-- Sección de gráfica -->
+    <section id="dailyChart" style="display:none;">
+      <h2>Promedio diario de pulsaciones</h2>
+      <canvas id="bpmChart"></canvas>
+    </section>
+
+    <!-- Historial -->
+    <ul id="historyList"></ul>
+
+    <!-- Perfil -->
+    <div id="profileInfo" style="display:none;"></div>
 
     <button id="logoutBtn" class="logout-button">Cerrar sesión</button>
   </div>

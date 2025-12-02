@@ -15,6 +15,7 @@ body {
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  position: relative;
 }
 
 .cardio-box {
@@ -74,4 +75,52 @@ body {
 
 .logout-button:active {
   transform: scale(0.98);
+}
+
+/* Menú hamburguesa */
+.menu-toggle {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100%;
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px;
+  transition: left 0.3s ease;
+  z-index: 999;
+}
+
+.side-menu.active {
+  left: 0;
+}
+
+.side-menu h2 {
+  margin-top: 0;
+  font-size: 20px;
+  border-bottom: 1px solid white;
+  padding-bottom: 10px;
+}
+
+.side-menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.side-menu ul li {
+  margin: 15px 0;
+  cursor: pointer;
+}
+
+.side-menu ul li:hover {
+  text-decoration: underline;
 }
