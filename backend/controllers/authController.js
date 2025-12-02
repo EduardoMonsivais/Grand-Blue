@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+// 📌 Registro
 const register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -9,7 +10,6 @@ const register = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ error: 'El correo ya está registrado' });
 
-    // 🚫 No hasheamos aquí, el modelo lo hace automáticamente
     const newUser = new User({ name, email, password });
     await newUser.save();
 
@@ -37,6 +37,7 @@ const register = async (req, res) => {
   }
 };
 
+// 📌 Login
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -71,6 +72,7 @@ const login = async (req, res) => {
   }
 };
 
+// 📌 Verificar sesión
 const verifySession = (req, res) => {
   const token = req.cookies.token || req.headers['authorization']?.split(' ')[1] || req.query.token;
   if (!token) return res.status(401).json({ authenticated: false });

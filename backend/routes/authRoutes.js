@@ -3,15 +3,20 @@ const router = express.Router();
 const { register, login, verifySession } = require('../controllers/authController');
 const verifyToken = require('../middleware/authMiddleware');
 
+// 📌 Registro y login
 router.post('/register', register);
 router.post('/login', login);
-router.get('/verify', verifySession); 
 
+// 📌 Verificar sesión (para index.js)
+router.get('/verify', verifySession);
+
+// 📌 Perfil protegido (para dashboard.js)
 router.get('/profile', verifyToken, (req, res) => {
   res.status(200).json({ message: `Hola ${req.user.name}, tu sesión está activa.` });
 });
 
-router.post('/logout', (req, res) => {
+// 📌 Logout
+router.post('/logout', (req, res) => { 
   res.clearCookie("token", {
     httpOnly: true,
     secure: true,

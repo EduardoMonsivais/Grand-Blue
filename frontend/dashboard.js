@@ -6,7 +6,7 @@ console.log("Token actual en localStorage:", token);
 async function checkSession() {
   if (!token) {
     console.warn("No hay token en localStorage, redirigiendo...");
-    window.location.href = 'index.html';
+    window.location.replace('index.html');
     return;
   }
 
@@ -23,7 +23,7 @@ async function checkSession() {
       `Bienvenido, ${data.message.split(' ')[1]} 👋`;
   } catch (err) {
     console.error('Error en checkSession:', err);
-    window.location.href = 'index.html';
+    window.location.replace('index.html');
   }
 }
 
@@ -50,11 +50,17 @@ function initLiveBPM() {
 
 initLiveBPM();
 
+// ✅ Logout corregido (sin bucle)
 document.getElementById('logoutBtn').addEventListener('click', async () => {
-  await fetch(`${API_BASE_URL}/api/logout`, { method: 'POST' });
+  try {
+    await fetch(`${API_BASE_URL}/api/logout`, { method: 'POST' });
+  } catch (err) {
+    console.error("Error en logout:", err);
+  }
+
   localStorage.removeItem('username');
   localStorage.removeItem('token');
-  window.location.href = 'index.html';
+  window.location.replace('index.html'); // 🔑 redirección limpia
 });
 
 async function sendBPM(bpm) {

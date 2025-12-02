@@ -2,16 +2,15 @@ const API_BASE_URL = 'https://health-sen.onrender.com';
 
 const token = localStorage.getItem('token');
 if (token) {
-  fetch(`${API_BASE_URL}/api/verify`, {
+  fetch(`${API_BASE_URL}/api/profile`, {
     method: 'GET',
-    headers: { Authorization: `Bearer ${token}` },
-    credentials: 'include'
+    headers: { Authorization: `Bearer ${token}` }
   })
     .then(async res => {
       if (!res.ok) return;
       const data = await res.json();
       if (data.authenticated) {
-        window.location.href = 'dashboard.html';
+        window.location.replace('dashboard.html'); // 🔑 redirección más limpia
       }
     })
     .catch(err => console.error('Error al verificar sesión:', err));
@@ -28,7 +27,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const res = await fetch(`${API_BASE_URL}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // 🔑 fija cookie httpOnly
+      credentials: 'include',
       body: JSON.stringify({ email, password })
     });
 
@@ -38,15 +37,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       message.style.color = 'green';
       message.textContent = `Bienvenido, ${data.user}!`;
 
-      // 🔑 Guardar token en localStorage
       localStorage.setItem('username', data.user);
       localStorage.setItem('token', data.token);
 
-      // 🔍 Mostrar token en consola (solo pruebas)
       console.log("Token guardado en localStorage:", data.token);
 
       setTimeout(() => {
-        window.location.href = 'dashboard.html';
+        window.location.replace('dashboard.html'); // 🔑 redirección más limpia
       }, 1000);
     } else {
       message.style.color = '#e74c3c';
