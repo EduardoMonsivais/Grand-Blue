@@ -50,18 +50,15 @@ function initLiveBPM() {
 
 initLiveBPM();
 
-// ✅ Logout
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-  try {
-    await fetch(`${API_BASE_URL}/api/logout`, { method: 'POST' });
-  } catch (err) {
-    console.error("Error en logout:", err);
-  }
+// ✅ Logout desde botón principal
+document.getElementById('logoutBtn').addEventListener('click', logout);
 
+// ✅ Logout desde menú lateral
+function logout() {
   localStorage.removeItem('username');
   localStorage.removeItem('token');
   window.location.replace('index.html');
-});
+}
 
 async function sendBPM(bpm) {
   try {
@@ -101,10 +98,7 @@ async function loadHistory() {
   }
 }
 
-// ✅ Gráfica de promedio diario con Chart.js
 async function loadChart() {
-  document.getElementById('dailyChart').style.display = 'block';
-
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -150,19 +144,26 @@ async function loadChart() {
   }
 }
 
-// ✅ Mostrar perfil desde /api/profile
 async function showProfile() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
-    document.getElementById('profileInfo').style.display = 'block';
     document.getElementById('profileInfo').innerHTML =
       `<p>Usuario: ${data.message}</p>`;
   } catch (err) {
     console.error('Error mostrando perfil:', err);
   }
+}
+
+// ✅ Mostrar solo una sección a la vez
+function showSection(sectionId) {
+  const sections = ['profileInfo', 'historyList', 'dailyChart'];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = id === sectionId ? 'block' : 'none';
+  });
 }
 
 // ✅ Activar menú hamburguesa sin errores
@@ -175,10 +176,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-// ✅ Función logout para el menú lateral
-function logout() {
-  localStorage.removeItem('username');
-  localStorage.removeItem('token');
-  window.location.replace('index.html');
-}

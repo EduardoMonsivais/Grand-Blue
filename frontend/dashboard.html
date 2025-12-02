@@ -18,9 +18,9 @@
   <div class="side-menu" id="sideMenu">
     <h2>Opciones</h2>
     <ul>
-      <li onclick="showProfile()">Perfil</li>
-      <li onclick="loadHistory()">Historial</li>
-      <li onclick="loadChart()">Gráfica BPM</li>
+      <li onclick="showSection('profileInfo'); showProfile()">Perfil</li>
+      <li onclick="showSection('historyList'); loadHistory()">Historial</li>
+      <li onclick="showSection('dailyChart'); loadChart()">Gráfica BPM</li>
       <li onclick="logout()">Cerrar sesión</li>
     </ul>
   </div>
@@ -34,17 +34,13 @@
     </div>
     <p id="timestamp"></p>
 
-    <!-- Sección de gráfica -->
+    <!-- Secciones modulares -->
+    <section id="profileInfo" style="display:none;"></section>
+    <section id="historyList" style="display:none;"></section>
     <section id="dailyChart" style="display:none;">
       <h2>Promedio diario de pulsaciones</h2>
       <canvas id="bpmChart"></canvas>
     </section>
-
-    <!-- Historial -->
-    <ul id="historyList"></ul>
-
-    <!-- Perfil -->
-    <div id="profileInfo" style="display:none;"></div>
 
     <button id="logoutBtn" class="logout-button">Cerrar sesión</button>
   </div>
