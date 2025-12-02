@@ -1,8 +1,7 @@
-const User = require('../models/userModel'); // 👈 asegúrate que el archivo se llame exactamente UserModel.js
+const User = require('../models/userModel'); 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-// 📌 Registro
 const register = async (req, res) => {
   const { name, email, password, deviceId } = req.body; // 👈 ahora también recibimos deviceId
 
