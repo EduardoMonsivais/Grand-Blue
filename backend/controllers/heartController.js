@@ -1,8 +1,9 @@
 const Heart = require('../models/HeartModel');
+const User = require('../models/UserModel'); // 👈 Importamos el modelo de usuario
 
 let sseClients = [];
 
-// 📥 Recibir BPM desde ESP32
+// 📥 Recibir BPM desde ESP32 autenticado con token (flujo actual)
 exports.receiveBPM = async (req, res) => {
   try {
     const { bpm, timestamp } = req.body;
@@ -24,7 +25,6 @@ exports.receiveBPM = async (req, res) => {
 
     console.log("💓 Nuevo BPM recibido:", record);
 
-    // 🔑 Notificar solo a los clientes SSE del mismo usuario
     console.log("Clientes SSE conectados:", sseClients.length);
     sseClients
       .filter(c => c.userId.toString() === userId.toString())
@@ -44,26 +44,71 @@ exports.receiveBPM = async (req, res) => {
   }
 };
 
+// 📥 Recibir BPM desde ESP32 usando deviceId (sin token)
+exports.receiveBPMFromDevice = async (req, res) => {
+  try {
+    const { deviceId, bpm, timestamp } = req.body;
+
+    if (!deviceId || !bpm) {
+      return res.status(400).json({ error: 'deviceId y bpm son requeridos' });
+    }
+
+    // Buscar usuario vinculado al deviceId
+    const user = await User.findOne({ deviceId });
+    if (!user) {
+      return res.status(404).json({ error: 'No se encontró usuario para este deviceId' });
+    }
+
+    const parsedTimestamp = timestamp
+      ? isNaN(timestamp)
+        ? new Date(timestamp)
+        : new Date(Number(timestamp))
+      : new Date();
+
+    const record = await Heart.create({
+      bpm,
+      timestamp: parsedTimestamp,
+      userId: user._id
+    });
+
+    console.log(`💓 BPM recibido de ${deviceId}:`, record);
+
+    console.log("Clientes SSE conectados:", sseClients.length);
+    sseClients
+      .filter(c => c.userId.toString() === user._id.toString())
+      .forEach(client => {
+        console.log(`➡️ Enviando BPM ${record.bpm} al cliente ${client.id}`);
+        client.res.write(`data: ${JSON.stringify(record)}\n\n`);
+      });
+
+    return res.status(201).json({
+      message: "BPM recibido",
+      data: record
+    });
+
+  } catch (error) {
+    console.error("❌ Error en receiveBPMFromDevice:", error);
+    res.status(500).json({ error: "Error interno al guardar BPM" });
+  }
+};
+
 // 🔴 SSE por usuario
 exports.sendLiveBPM = async (req, res) => {
   try {
-    const userId = req.user.id; // viene del token
+    const userId = req.user.id;
 
-    // 🔧 Permitir SSE desde cualquier origen (CORS)
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
     res.flushHeaders();
 
-    // 🔄 Enviar el último BPM al conectar
     const latest = await Heart.findOne({ userId }).sort({ timestamp: -1 });
     if (latest) {
       console.log(`📡 Enviando último BPM (${latest.bpm}) al nuevo cliente SSE`);
       res.write(`data: ${JSON.stringify(latest)}\n\n`);
     }
 
-    // 🧩 Registrar cliente SSE
     const client = { id: Date.now(), res, userId };
     sseClients.push(client);
     console.log(`✅ Cliente SSE conectado: ${client.id}, total: ${sseClients.length}`);

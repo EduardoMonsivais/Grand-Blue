@@ -1,24 +1,34 @@
-const User = require('../models/userModel');
+const User = require('../models/userModel'); // 👈 asegúrate que el archivo se llame exactamente UserModel.js
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 // 📌 Registro
 const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, deviceId } = req.body; // 👈 ahora también recibimos deviceId
 
   try {
+    // Verificar si ya existe el correo
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ error: 'El correo ya está registrado' });
 
-    const newUser = new User({ name, email, password });
+    // Verificar si ya existe el deviceId
+    if (deviceId) {
+      const existingDevice = await User.findOne({ deviceId });
+      if (existingDevice) return res.status(400).json({ error: 'Este deviceId ya está vinculado a otro usuario' });
+    }
+
+    // Crear nuevo usuario con deviceId
+    const newUser = new User({ name, email, password, deviceId });
     await newUser.save();
 
+    // Generar token
     const token = jwt.sign(
       { id: newUser._id, name: newUser.name },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
+    // Guardar token en cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
@@ -29,6 +39,7 @@ const register = async (req, res) => {
     res.status(201).json({
       message: 'Usuario registrado exitosamente',
       user: newUser.name,
+      deviceId: newUser.deviceId, // 👈 devolvemos también el deviceId
       token
     });
   } catch (error) {
@@ -64,6 +75,7 @@ const login = async (req, res) => {
     res.status(200).json({
       message: 'Inicio de sesión exitoso',
       user: user.name,
+      deviceId: user.deviceId, // 👈 devolvemos también el deviceId
       token
     });
   } catch (error) {

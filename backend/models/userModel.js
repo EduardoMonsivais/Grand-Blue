@@ -4,7 +4,8 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  deviceId: { type: String, unique: true } // 👈 Nuevo campo para vincular el ESP32
 });
 
 userSchema.pre('save', async function (next) {
