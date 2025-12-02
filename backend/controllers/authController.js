@@ -1,16 +1,16 @@
-const User = require('../models/userModel'); 
+const User = require('../models/UserModel'); 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 const register = async (req, res) => {
-  const { name, email, password, deviceId } = req.body; // 👈 ahora también recibimos deviceId
+  const { name, email, password, deviceId } = req.body; 
 
   try {
     // Verificar si ya existe el correo
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ error: 'El correo ya está registrado' });
 
-    // Verificar si ya existe el deviceId
+    // Verificar si ya existe el deviceI
     if (deviceId) {
       const existingDevice = await User.findOne({ deviceId });
       if (existingDevice) return res.status(400).json({ error: 'Este deviceId ya está vinculado a otro usuario' });

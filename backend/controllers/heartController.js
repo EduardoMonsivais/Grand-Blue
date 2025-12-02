@@ -1,5 +1,5 @@
 const Heart = require('../models/HeartModel');
-const User = require('../models/UserModel'); // 👈 Importamos el modelo de usuario
+const User = require('../models/UserModel');
 
 let sseClients = [];
 
