@@ -1,11 +1,11 @@
 const express = require('express');
 const verifyToken = require('../middleware/authMiddleware');
 const {
-  receiveBPM,
-  receiveBPMFromDevice, // 👈 Nueva función para Arduino con deviceId
-  sendLiveBPM,
-  getHistory,
-  getLatest
+  receiveBPM,           // flujo con token
+  receiveBPMFromDevice, // flujo con deviceId (Arduino/ESP32)
+  sendLiveBPM,          // SSE en vivo
+  getHistory,           // historial del usuario
+  getLatest             // último BPM
 } = require('../controllers/heartController');
 
 const router = express.Router();
@@ -16,7 +16,7 @@ router.post('/', verifyToken, receiveBPM);
 // 📥 Guardar BPM desde Arduino usando deviceId (sin token)
 router.post('/device', receiveBPMFromDevice);
 
-// 📡 SSE en vivo (solo autenticados, así se filtra por usuario)
+// 📡 SSE en vivo (solo autenticados, filtra por usuario)
 router.get('/live', verifyToken, sendLiveBPM);
 
 // 📜 Historial privado del usuario

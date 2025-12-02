@@ -2,21 +2,21 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+// 📌 Registro de usuario con deviceId automático
 const register = async (req, res) => {
-  const { name, email, password, deviceId } = req.body; 
+  const { name, email, password } = req.body;
+  const deviceId = req.body.deviceId || `ESP32-${Date.now()}`; // 👈 se genera si no se envía
 
   try {
     // Verificar si ya existe el correo
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ error: 'El correo ya está registrado' });
 
-    // Verificar si ya existe el deviceI
-    if (deviceId) {
-      const existingDevice = await User.findOne({ deviceId });
-      if (existingDevice) return res.status(400).json({ error: 'Este deviceId ya está vinculado a otro usuario' });
-    }
+    // Verificar si el deviceId ya está vinculado
+    const existingDevice = await User.findOne({ deviceId });
+    if (existingDevice) return res.status(400).json({ error: 'Este deviceId ya está vinculado a otro usuario' });
 
-    // Crear nuevo usuario con deviceId
+    // Crear nuevo usuario
     const newUser = new User({ name, email, password, deviceId });
     await newUser.save();
 
@@ -27,18 +27,10 @@ const register = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // Guardar token en cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 1000 * 60 * 60 * 24 * 7
-    });
-
     res.status(201).json({
       message: 'Usuario registrado exitosamente',
       user: newUser.name,
-      deviceId: newUser.deviceId, // 👈 devolvemos también el deviceId
+      deviceId: newUser.deviceId, // 👈 devolvemos el deviceId
       token
     });
   } catch (error) {
@@ -50,7 +42,6 @@ const register = async (req, res) => {
 // 📌 Login
 const login = async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: 'Correo no encontrado' });
@@ -64,17 +55,10 @@ const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 1000 * 60 * 60 * 24 * 7
-    });
-
     res.status(200).json({
       message: 'Inicio de sesión exitoso',
       user: user.name,
-      deviceId: user.deviceId, // 👈 devolvemos también el deviceId
+      deviceId: user.deviceId, // 👈 devolvemos el deviceId
       token
     });
   } catch (error) {
@@ -84,13 +68,20 @@ const login = async (req, res) => {
 };
 
 // 📌 Verificar sesión
-const verifySession = (req, res) => {
+const verifySession = async (req, res) => {
   const token = req.cookies.token || req.headers['authorization']?.split(' ')[1] || req.query.token;
   if (!token) return res.status(401).json({ authenticated: false });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.status(200).json({ authenticated: true, user: decoded.name });
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(401).json({ authenticated: false });
+
+    res.status(200).json({
+      authenticated: true,
+      user: user.name,
+      deviceId: user.deviceId // 👈 devolvemos el deviceId
+    });
   } catch (err) {
     res.status(401).json({ authenticated: false });
   }
