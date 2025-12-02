@@ -38,25 +38,53 @@ async function checkSession() {
 }
 checkSession();
 
-// 📡 SSE para BPM en tiempo real con alerta
+// 📡 SSE para BPM en tiempo real con alerta y persistencia
 function initLiveBPM() {
+  const heartbeatEl = document.getElementById('heartbeat');
+  const timestampEl = document.getElementById('timestamp');
+  const cardioBox = document.querySelector('.cardio-box');
+
+  // 🧠 Mostrar último BPM guardado si existe
+  const lastBPM = localStorage.getItem('lastBPM');
+  const lastTime = localStorage.getItem('lastTimestamp');
+  if (lastBPM && lastTime) {
+    heartbeatEl.textContent = `${lastBPM} bpm`;
+    timestampEl.textContent = `Última actualización: ${new Date(lastTime).toLocaleString()}`;
+
+    // 🚨 Mostrar alerta si fuera de rango
+    if (lastBPM < 60 || lastBPM > 100) {
+      cardioBox.style.backgroundColor = '#e74c3c';
+      cardioBox.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.8)';
+    } else {
+      cardioBox.style.backgroundColor = '#1abc9c';
+      cardioBox.style.boxShadow = 'none';
+    }
+  } else {
+    heartbeatEl.textContent = 'Esperando datos...';
+    timestampEl.textContent = '';
+  }
+
+  // 🔄 Conexión SSE
   const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live?token=${token}`);
 
   eventSource.onmessage = (event) => {
     const data = JSON.parse(event.data);
     const bpm = data.bpm;
+    const time = data.timestamp;
 
-    document.getElementById('heartbeat').textContent = `${bpm} bpm`;
-    document.getElementById('timestamp').textContent =
-      `Última actualización: ${new Date(data.timestamp).toLocaleString()}`;
+    heartbeatEl.textContent = `${bpm} bpm`;
+    timestampEl.textContent = `Última actualización: ${new Date(time).toLocaleString()}`;
 
-    // 🚨 Alerta si el ritmo está fuera de rango
-    const cardioBox = document.querySelector('.cardio-box');
+    // 💾 Guardar en localStorage
+    localStorage.setItem('lastBPM', bpm);
+    localStorage.setItem('lastTimestamp', time);
+
+    // 🚨 Alerta visual
     if (bpm < 60 || bpm > 100) {
-      cardioBox.style.backgroundColor = '#e74c3c'; // rojo alerta
+      cardioBox.style.backgroundColor = '#e74c3c';
       cardioBox.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.8)';
     } else {
-      cardioBox.style.backgroundColor = '#1abc9c'; // verde normal
+      cardioBox.style.backgroundColor = '#1abc9c';
       cardioBox.style.boxShadow = 'none';
     }
   };
@@ -72,6 +100,8 @@ initLiveBPM();
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('deviceId');
+  localStorage.removeItem('lastBPM');
+  localStorage.removeItem('lastTimestamp');
   window.location.replace('index.html');
 }
 
