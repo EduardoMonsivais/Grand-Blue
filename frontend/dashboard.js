@@ -25,7 +25,6 @@ async function checkSession() {
     document.getElementById('welcomeMessage').textContent =
       `Bienvenido, ${data.user} 👋`;
 
-    // 👇 Mostrar nombre en el menú lateral
     const profileNameEl = document.getElementById('profileName');
     if (profileNameEl) profileNameEl.textContent = data.user;
 
@@ -57,8 +56,7 @@ function initLiveBPM() {
 }
 initLiveBPM();
 
-// 📌 Logout
-document.getElementById('logoutBtn').addEventListener('click', logout);
+// 📌 Logout (solo menú lateral)
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('deviceId');
@@ -95,7 +93,7 @@ async function loadHistory() {
   }
 }
 
-// 📌 Gráfica diaria
+// 📌 Gráfica diaria (línea tipo escala médica)
 async function loadChart() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
@@ -118,21 +116,38 @@ async function loadChart() {
     });
 
     const bgColors = data.map(bpm =>
-      bpm < 60 || bpm > 100 ? 'rgba(231, 76, 60, 0.7)' : 'rgba(46, 204, 113, 0.7)'
+      bpm < 60 || bpm > 100 ? 'rgba(231, 76, 60, 1)' : 'rgba(46, 204, 113, 1)'
     );
 
     new Chart(document.getElementById('bpmChart'), {
-      type: 'bar',
+      type: 'line',
       data: {
         labels,
         datasets: [{
           label: 'Promedio BPM',
           data,
-          backgroundColor: bgColors
+          borderColor: 'rgba(52, 152, 219, 1)',
+          backgroundColor: 'rgba(52, 152, 219, 0.2)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: bgColors
         }]
       },
       options: {
-        scales: { y: { beginAtZero: true } }
+        scales: {
+          y: {
+            beginAtZero: true,
+            suggestedMax: 120
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: 'white'
+            }
+          }
+        }
       }
     });
   } catch (err) {
@@ -140,13 +155,22 @@ async function loadChart() {
   }
 }
 
-// 📌 Mostrar solo una sección a la vez
+// 📌 Mostrar solo una sección a la vez con animación
 function showSection(sectionId) {
   const sections = ['profileInfo', 'historyList', 'dailyChart'];
   sections.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = id === sectionId ? 'block' : 'none';
+    if (el) {
+      el.classList.remove('active');
+      el.style.display = 'none';
+    }
   });
+
+  const target = document.getElementById(sectionId);
+  if (target) {
+    target.style.display = 'block';
+    setTimeout(() => target.classList.add('active'), 10);
+  }
 
   // 👇 Cerrar menú automáticamente al seleccionar
   const menu = document.getElementById('sideMenu');
