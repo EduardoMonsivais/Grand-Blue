@@ -47,17 +47,20 @@ exports.sendLiveBPM = async (req, res) => {
   try {
     const userId = req.user.id; // viene del token
 
+    // 🔧 Permitir SSE desde cualquier origen (CORS)
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
     res.flushHeaders();
 
-    // 🔑 Enviar el último BPM del usuario
+    // 🔄 Enviar el último BPM al conectar
     const latest = await Heart.findOne({ userId }).sort({ timestamp: -1 });
     if (latest) {
       res.write(`data: ${JSON.stringify(latest)}\n\n`);
     }
 
+    // 🧩 Registrar cliente SSE
     const client = { id: Date.now(), res, userId };
     sseClients.push(client);
 
