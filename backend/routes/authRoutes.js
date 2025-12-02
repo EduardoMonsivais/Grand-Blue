@@ -4,7 +4,7 @@ const { register, login, verifySession } = require('../controllers/authControlle
 const verifyToken = require('../middleware/authMiddleware');
 
 // 📌 Registro y login
-router.post('/register', register); // 👈 Ahora el register debe aceptar { name, email, password, deviceId }
+router.post('/register', register); 
 router.post('/login', login);
 
 // 📌 Verificar sesión (para index.js e inicio.js)
@@ -14,7 +14,8 @@ router.get('/verify', verifySession);
 router.get('/profile', verifyToken, (req, res) => {
   res.status(200).json({
     authenticated: true,
-    message: `Hola ${req.user.name}, tu sesión está activa.`
+    user: req.user.name,        // 👈 nombre del usuario
+    deviceId: req.user.deviceId // 👈 deviceId del usuario
   });
 });
 
