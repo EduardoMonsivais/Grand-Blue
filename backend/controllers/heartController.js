@@ -1,5 +1,5 @@
 const Heart = require('../models/HeartModel');
-const User = require('../models/UserModel');
+const User = require('../models/userModel');
 
 let sseClients = [];
 
