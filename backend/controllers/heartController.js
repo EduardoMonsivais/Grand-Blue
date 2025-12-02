@@ -25,9 +25,11 @@ exports.receiveBPM = async (req, res) => {
     console.log("💓 Nuevo BPM recibido:", record);
 
     // 🔑 Notificar solo a los clientes SSE del mismo usuario
+    console.log("Clientes SSE conectados:", sseClients.length);
     sseClients
       .filter(c => c.userId.toString() === userId.toString())
       .forEach(client => {
+        console.log(`➡️ Enviando BPM ${record.bpm} al cliente ${client.id}`);
         client.res.write(`data: ${JSON.stringify(record)}\n\n`);
       });
 
@@ -57,15 +59,18 @@ exports.sendLiveBPM = async (req, res) => {
     // 🔄 Enviar el último BPM al conectar
     const latest = await Heart.findOne({ userId }).sort({ timestamp: -1 });
     if (latest) {
+      console.log(`📡 Enviando último BPM (${latest.bpm}) al nuevo cliente SSE`);
       res.write(`data: ${JSON.stringify(latest)}\n\n`);
     }
 
     // 🧩 Registrar cliente SSE
     const client = { id: Date.now(), res, userId };
     sseClients.push(client);
+    console.log(`✅ Cliente SSE conectado: ${client.id}, total: ${sseClients.length}`);
 
     req.on("close", () => {
       sseClients = sseClients.filter(c => c.id !== client.id);
+      console.log(`❌ Cliente SSE desconectado: ${client.id}, total: ${sseClients.length}`);
     });
   } catch (err) {
     console.error("❌ Error en sendLiveBPM:", err);
