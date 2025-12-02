@@ -1,4 +1,4 @@
-const VERSION = '0.3';
+const VERSION = '0.4';
 const CACHE_NAME = `cache-${VERSION}`;
 
 const appshell = [
@@ -15,6 +15,7 @@ const appshell = [
   '/images/Health.png'
 ];
 
+// 📌 Instalar y cachear recursos estáticos
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
@@ -41,6 +42,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
+// 📌 Activar y limpiar cachés viejas
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -56,10 +58,11 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// 📌 Estrategia de fetch
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // ❌ No interceptar APIs ni SSE ni dashboard.html
+  // 🚫 No interceptar APIs dinámicas ni SSE ni dashboard.html
   if (
     url.pathname.startsWith('/api/') ||
     url.pathname === '/dashboard.html' ||
@@ -68,6 +71,7 @@ self.addEventListener("fetch", (event) => {
     return; // dejar que el navegador lo maneje directamente
   }
 
+  // Solo manejar GET
   if (event.request.method !== "GET") return;
 
   event.respondWith(
