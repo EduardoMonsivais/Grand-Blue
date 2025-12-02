@@ -38,15 +38,27 @@ async function checkSession() {
 }
 checkSession();
 
-// 📡 SSE para BPM en tiempo real
+// 📡 SSE para BPM en tiempo real con alerta
 function initLiveBPM() {
   const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live?token=${token}`);
 
   eventSource.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    document.getElementById('heartbeat').textContent = `${data.bpm} bpm`;
+    const bpm = data.bpm;
+
+    document.getElementById('heartbeat').textContent = `${bpm} bpm`;
     document.getElementById('timestamp').textContent =
       `Última actualización: ${new Date(data.timestamp).toLocaleString()}`;
+
+    // 🚨 Alerta si el ritmo está fuera de rango
+    const cardioBox = document.querySelector('.cardio-box');
+    if (bpm < 60 || bpm > 100) {
+      cardioBox.style.backgroundColor = '#e74c3c'; // rojo alerta
+      cardioBox.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.8)';
+    } else {
+      cardioBox.style.backgroundColor = '#1abc9c'; // verde normal
+      cardioBox.style.boxShadow = 'none';
+    }
   };
 
   eventSource.onerror = (err) => {
@@ -77,15 +89,19 @@ async function showProfile() {
   }
 }
 
-// 📌 Historial
+// 📌 Historial (solo últimos 10 registros)
 async function loadHistory() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const history = await res.json();
+
+    // Tomamos solo los últimos 10 registros
+    const lastTen = history.slice(-10);
+
     const list = document.getElementById('historyList');
-    list.innerHTML = history.map(h =>
+    list.innerHTML = lastTen.map(h =>
       `<li>${h.bpm} bpm - ${new Date(h.timestamp).toLocaleString()}</li>`
     ).join('');
   } catch (err) {
@@ -93,7 +109,7 @@ async function loadHistory() {
   }
 }
 
-// 📌 Gráfica diaria (línea tipo escala médica)
+// 📌 Gráfica diaria (solo últimos 10 días)
 async function loadChart() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
@@ -108,12 +124,18 @@ async function loadChart() {
       grouped[date].push(h.bpm);
     });
 
-    const labels = Object.keys(grouped);
-    const data = labels.map(date => {
+    let labels = Object.keys(grouped);
+    let data = labels.map(date => {
       const values = grouped[date];
       const avg = values.reduce((a, b) => a + b, 0) / values.length;
       return Math.round(avg);
     });
+
+    // 🚦 Solo últimos 10 días
+    if (labels.length > 10) {
+      labels = labels.slice(-10);
+      data = data.slice(-10);
+    }
 
     const bgColors = data.map(bpm =>
       bpm < 60 || bpm > 100 ? 'rgba(231, 76, 60, 1)' : 'rgba(46, 204, 113, 1)'
