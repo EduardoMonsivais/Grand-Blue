@@ -7,12 +7,15 @@ const verifyToken = require('../middleware/authMiddleware');
 router.post('/register', register);
 router.post('/login', login);
 
-// 📌 Verificar sesión (para index.js)
+// 📌 Verificar sesión (para index.js e inicio.js)
 router.get('/verify', verifySession);
 
 // 📌 Perfil protegido (para dashboard.js)
 router.get('/profile', verifyToken, (req, res) => {
-  res.status(200).json({ message: `Hola ${req.user.name}, tu sesión está activa.` });
+  res.status(200).json({
+    authenticated: true, // 🔑 agregado para que el frontend pueda validar
+    message: `Hola ${req.user.name}, tu sesión está activa.`
+  });
 });
 
 // 📌 Logout

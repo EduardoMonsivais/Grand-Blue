@@ -55,7 +55,7 @@
           <p>Con nuestra aplicación móvil y web podrás ver la información sobre nuestros seres queridos de edad avanzada para poder saber cómo se encuentran y si están en una situación de riesgo.</p>
 
           <h3><span>2</span> Objetivo</h3>
-          <p>Proporcionar un apoyo a los usuarios de silla de ruedas o adultos mayores, garantizando su seguridad y comodidad fuera de casa.</p>
+          <p>Nuestro objetivo se encuentra en proporcionar seguridad para los más grandes del hogar y usuarios con padecimientos del corazón, buscando que mediante su ritmo cardíaco, Los familiares y/o personas a cargo sepan la situación del usuario y puedan actuar para evitar situaciones que comprometan su salud.</p>
         </div>
       </div>
     </section>
@@ -127,22 +127,31 @@
     <h2 class="titulo-final">© 2025 Health Sen</h2>
   </footer>
 
-  <!-- 🔍 Verificación de sesión -->
+  <!-- 🔍 Verificación de sesión al cargar -->
   <script>
     const API_BASE_URL = 'https://health-sen.onrender.com';
+    const token = localStorage.getItem('token');
 
-    fetch(`${API_BASE_URL}/api/verify`, {
-      method: 'GET',
-      credentials: 'include'
-    })
-      .then(async res => {
-        if (!res.ok) return; 
-        const data = await res.json();
-        if (data.authenticated) {
-          window.location.href = 'dashboard.html';
-        }
+    if (token) {
+      fetch(`${API_BASE_URL}/api/verify`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
       })
-      .catch(err => console.error('Error al verificar sesión:', err));
+        .then(async res => {
+          if (!res.ok) {
+            localStorage.removeItem('token'); // 🔑 Limpia token inválido
+            return;
+          }
+          const data = await res.json();
+          if (data.authenticated) {
+            window.location.replace('dashboard.html'); // ✅ Redirección limpia
+          }
+        })
+        .catch(err => {
+          console.error('Error al verificar sesión:', err);
+          localStorage.removeItem('token');
+        });
+    }
   </script>
 
   <!-- ✅ Registro del Service Worker -->
