@@ -29,7 +29,7 @@ async function checkSession() {
 
 checkSession();
 
-// ✅ Tiempo real con SSE (token en URL para móvil)
+// ✅ Tiempo real con SSE
 function initLiveBPM() {
   const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live?token=${token}`);
 
@@ -50,7 +50,7 @@ function initLiveBPM() {
 
 initLiveBPM();
 
-// ✅ Logout corregido (sin bucle)
+// ✅ Logout
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   try {
     await fetch(`${API_BASE_URL}/api/logout`, { method: 'POST' });
@@ -60,7 +60,7 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 
   localStorage.removeItem('username');
   localStorage.removeItem('token');
-  window.location.replace('index.html'); // 🔑 redirección limpia
+  window.location.replace('index.html');
 });
 
 async function sendBPM(bpm) {
@@ -111,7 +111,6 @@ async function loadChart() {
     });
     const history = await res.json();
 
-    // Agrupar por fecha
     const grouped = {};
     history.forEach(h => {
       const date = new Date(h.timestamp).toLocaleDateString();
@@ -119,7 +118,6 @@ async function loadChart() {
       grouped[date].push(h.bpm);
     });
 
-    // Calcular promedio por día
     const labels = Object.keys(grouped);
     const data = labels.map(date => {
       const values = grouped[date];
@@ -127,12 +125,10 @@ async function loadChart() {
       return Math.round(avg);
     });
 
-    // Colores por rango
     const bgColors = data.map(bpm =>
       bpm < 60 || bpm > 100 ? 'rgba(231, 76, 60, 0.7)' : 'rgba(46, 204, 113, 0.7)'
     );
 
-    // Renderizar gráfica
     new Chart(document.getElementById('bpmChart'), {
       type: 'bar',
       data: {
@@ -169,8 +165,20 @@ async function showProfile() {
   }
 }
 
-// ✅ Activar menú hamburguesa
-function toggleMenu() {
-  const menu = document.getElementById('sideMenu');
-  menu.classList.toggle('active');
+// ✅ Activar menú hamburguesa sin errores
+document.addEventListener('DOMContentLoaded', () => {
+  const menuToggle = document.getElementById('menuToggle');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+      const menu = document.getElementById('sideMenu');
+      menu.classList.toggle('active');
+    });
+  }
+});
+
+// ✅ Función logout para el menú lateral
+function logout() {
+  localStorage.removeItem('username');
+  localStorage.removeItem('token');
+  window.location.replace('index.html');
 }
