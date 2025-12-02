@@ -9,20 +9,43 @@
   <link rel="icon" href="./images/Health.jpg" type="image/jpeg">
   <meta name="theme-color" content="#2c3e50" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- 👇 FontAwesome para íconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body>
   <!-- ☰ Icono de menú -->
-  <div class="menu-toggle" id="menuToggle">☰</div>
+  <div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
 
   <!-- Menú lateral -->
   <div class="side-menu" id="sideMenu">
-    <h2>Opciones</h2>
-    <ul>
-      <li onclick="showSection('profileInfo'); showProfile()">Perfil</li>
-      <li onclick="showSection('historyList'); loadHistory()">Historial</li>
-      <li onclick="showSection('dailyChart'); loadChart()">Gráfica BPM</li>
-      <li onclick="logout()">Cerrar sesión</li>
+    <div class="profile-section">
+      <img src="./images/user-icon.png" alt="Usuario" class="profile-icon" />
+      <p class="profile-name" id="profileName">Usuario</p>
+      <button onclick="logout()" class="logout-button small">Cerrar sesión</button>
+    </div>
+
+    <ul class="menu-list">
+      <li onclick="showSection('profileInfo'); showProfile()">
+        <i class="fas fa-user"></i> Perfil
+      </li>
+      <li onclick="showSection('historyList'); loadHistory()">
+        <i class="fas fa-history"></i> Historial
+      </li>
+      <li onclick="showSection('dailyChart'); loadChart()">
+        <i class="fas fa-chart-bar"></i> Gráfica BPM
+      </li>
+      <li onclick="showSection('settings')">
+        <i class="fas fa-cog"></i> Ajustes
+      </li>
     </ul>
+
+    <div class="extras">
+      <h3>Extras</h3>
+      <ul>
+        <li><i class="fas fa-gamepad"></i> Juegos</li>
+        <li><i class="fas fa-info-circle"></i> Acerca de</li>
+      </ul>
+    </div>
   </div>
 
   <div class="container">

@@ -25,6 +25,10 @@ async function checkSession() {
     document.getElementById('welcomeMessage').textContent =
       `Bienvenido, ${data.user} 👋`;
 
+    // 👇 Mostrar nombre en el menú lateral
+    const profileNameEl = document.getElementById('profileName');
+    if (profileNameEl) profileNameEl.textContent = data.user;
+
     showProfile();
     loadHistory();
     loadChart();
@@ -63,65 +67,77 @@ function logout() {
 
 // 📌 Mostrar perfil
 async function showProfile() {
-  const res = await fetch(`${API_BASE_URL}/api/profile`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const data = await res.json();
-  document.getElementById('profileInfo').innerHTML =
-    `<p>Usuario: ${data.user}</p><p>Device ID: ${data.deviceId}</p>`;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/profile`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    document.getElementById('profileInfo').innerHTML =
+      `<p>Usuario: ${data.user}</p><p>Device ID: ${data.deviceId}</p>`;
+  } catch (err) {
+    console.error('Error mostrando perfil:', err);
+  }
 }
 
 // 📌 Historial
 async function loadHistory() {
-  const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const history = await res.json();
-  const list = document.getElementById('historyList');
-  list.innerHTML = history.map(h =>
-    `<li>${h.bpm} bpm - ${new Date(h.timestamp).toLocaleString()}</li>`
-  ).join('');
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const history = await res.json();
+    const list = document.getElementById('historyList');
+    list.innerHTML = history.map(h =>
+      `<li>${h.bpm} bpm - ${new Date(h.timestamp).toLocaleString()}</li>`
+    ).join('');
+  } catch (err) {
+    console.error('Error cargando historial:', err);
+  }
 }
 
 // 📌 Gráfica diaria
 async function loadChart() {
-  const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const history = await res.json();
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const history = await res.json();
 
-  const grouped = {};
-  history.forEach(h => {
-    const date = new Date(h.timestamp).toLocaleDateString();
-    if (!grouped[date]) grouped[date] = [];
-    grouped[date].push(h.bpm);
-  });
+    const grouped = {};
+    history.forEach(h => {
+      const date = new Date(h.timestamp).toLocaleDateString();
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push(h.bpm);
+    });
 
-  const labels = Object.keys(grouped);
-  const data = labels.map(date => {
-    const values = grouped[date];
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    return Math.round(avg);
-  });
+    const labels = Object.keys(grouped);
+    const data = labels.map(date => {
+      const values = grouped[date];
+      const avg = values.reduce((a, b) => a + b, 0) / values.length;
+      return Math.round(avg);
+    });
 
-  const bgColors = data.map(bpm =>
-    bpm < 60 || bpm > 100 ? 'rgba(231, 76, 60, 0.7)' : 'rgba(46, 204, 113, 0.7)'
-  );
+    const bgColors = data.map(bpm =>
+      bpm < 60 || bpm > 100 ? 'rgba(231, 76, 60, 0.7)' : 'rgba(46, 204, 113, 0.7)'
+    );
 
-  new Chart(document.getElementById('bpmChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Promedio BPM',
-        data,
-        backgroundColor: bgColors
-      }]
-    },
-    options: {
-      scales: { y: { beginAtZero: true } }
-    }
-  });
+    new Chart(document.getElementById('bpmChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Promedio BPM',
+          data,
+          backgroundColor: bgColors
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  } catch (err) {
+    console.error('Error cargando gráfica:', err);
+  }
 }
 
 // 📌 Mostrar solo una sección a la vez
@@ -131,6 +147,10 @@ function showSection(sectionId) {
     const el = document.getElementById(id);
     if (el) el.style.display = id === sectionId ? 'block' : 'none';
   });
+
+  // 👇 Cerrar menú automáticamente al seleccionar
+  const menu = document.getElementById('sideMenu');
+  if (menu) menu.classList.remove('active');
 }
 
 // 📌 Menú hamburguesa
