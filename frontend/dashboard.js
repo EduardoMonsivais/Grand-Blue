@@ -153,3 +153,24 @@ async function loadChart() {
     console.error('Error cargando gráfica:', err);
   }
 }
+
+// ✅ Mostrar perfil desde /api/profile
+async function showProfile() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/profile`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    document.getElementById('profileInfo').style.display = 'block';
+    document.getElementById('profileInfo').innerHTML =
+      `<p>Usuario: ${data.message}</p>`;
+  } catch (err) {
+    console.error('Error mostrando perfil:', err);
+  }
+}
+
+// ✅ Activar menú hamburguesa
+function toggleMenu() {
+  const menu = document.getElementById('sideMenu');
+  menu.classList.toggle('active');
+}
