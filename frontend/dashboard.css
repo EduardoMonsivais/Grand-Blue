@@ -4,9 +4,10 @@ body {
   color: white;
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
+  align-items: flex-start;
+  min-height: 100vh;
   margin: 0;
+  padding-top: 40px;
 }
 
 .container {
@@ -16,8 +17,11 @@ body {
   border-radius: 12px;
   box-shadow: 0 0 20px rgba(0,0,0,0.3);
   position: relative;
+  width: 100%;
+  max-width: 1000px;
 }
 
+/* Bloque de ritmo cardíaco (solo visible para usuarios) */
 .cardio-box {
   margin-top: 20px;
   padding: 30px;
@@ -54,7 +58,7 @@ body {
   100% { transform: scale(1); }
 }
 
-/* Botón de logout solo en menú lateral */
+/* Botón de logout */
 .logout-button {
   margin-top: 30px;
   padding: 12px 24px;
@@ -189,31 +193,35 @@ section.active {
 
 /* ===== Panel de Administrador ===== */
 #adminPanel {
-  margin-top: 30px;
-  padding: 20px;
-  background-color: rgba(255, 255, 255, 0.05);
+  margin: 40px auto;
+  padding: 30px;
+  background-color: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
   color: #ecf0f1;
+  max-width: 900px;
+  overflow-x: auto; /* 👈 permite scroll horizontal en móviles */
 }
 
 #adminPanel h2 {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   color: #1abc9c;
   text-align: center;
-  font-size: 22px;
+  font-size: 26px;
+  font-weight: bold;
 }
 
 #adminPanel table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 #adminPanel th, #adminPanel td {
-  padding: 10px;
+  padding: 12px;
   text-align: center;
   border-bottom: 1px solid #34495e;
+  font-size: 14px;
 }
 
 #adminPanel th {
@@ -230,4 +238,86 @@ section.active {
   background-color: #1abc9c;
   color: #fff;
   transition: background-color 0.3s ease;
+}
+
+/* Botones dentro del panel admin */
+#adminPanel .action-btn {
+  padding: 6px 12px;
+  background-color: #1abc9c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+}
+
+#adminPanel .action-btn:hover {
+  background-color: #16a085;
+}
+
+/* ===== Responsividad ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  #adminPanel {
+    padding: 20px;
+    margin: 20px auto;
+  }
+
+  #adminPanel h2 {
+    font-size: 22px;
+  }
+
+  #adminPanel th, #adminPanel td {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .menu-toggle {
+    font-size: 24px;
+  }
+
+  .profile-name {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding-top: 20px;
+  }
+
+  .container {
+    padding: 15px;
+  }
+
+  #adminPanel {
+    padding: 15px;
+    margin: 15px auto;
+  }
+
+  #adminPanel h2 {
+    font-size: 20px;
+  }
+
+  #adminPanel th, #adminPanel td {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .logout-button {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+
+  .menu-toggle {
+    font-size: 22px;
+  }
+
+  .profile-name {
+    font-size: 14px;
+  }
 }

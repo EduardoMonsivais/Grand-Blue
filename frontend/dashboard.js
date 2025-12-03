@@ -21,24 +21,47 @@ async function checkSession() {
       localStorage.setItem('deviceId', data.deviceId);
     }
 
-    document.getElementById('welcomeMessage').textContent =
-      `Bienvenido, ${data.user} 👋`;
+    const welcomeEl = document.getElementById('welcomeMessage');
+    if (welcomeEl) {
+      welcomeEl.textContent = `Bienvenido, ${data.user} 👋`;
+    }
 
     const profileNameEl = document.getElementById('profileName');
     if (profileNameEl) profileNameEl.textContent = data.user;
 
-    showProfile();
-    loadHistory();
-    loadChart();
-
-    // 👇 Mostrar panel admin si el rol es "admin"
+    // 👇 Si es admin, ocultar todo excepto el panel admin
     if (data.role === 'admin') {
       const adminPanelEl = document.getElementById('adminPanel');
       const adminMenuEl = document.getElementById('adminMenu');
+
+      // Ocultar secciones de usuario
+      const cardioBox = document.querySelector('.cardio-box');
+      const timestampEl = document.getElementById('timestamp');
+      const profileInfoEl = document.getElementById('profileInfo');
+      const historyListEl = document.getElementById('historyList');
+      const chartEl = document.getElementById('dailyChart');
+
+      if (cardioBox) cardioBox.style.display = 'none';
+      if (timestampEl) timestampEl.style.display = 'none';
+      if (welcomeEl) welcomeEl.style.display = 'none';
+      if (profileInfoEl) profileInfoEl.style.display = 'none';
+      if (historyListEl) historyListEl.style.display = 'none';
+      if (chartEl) chartEl.style.display = 'none';
+
+      // Mostrar panel admin
       if (adminPanelEl) adminPanelEl.style.display = 'block';
       if (adminMenuEl) adminMenuEl.style.display = 'block';
+
+      // Cargar tabla admin
       loadAdminPulses();
+      return; // 👈 no cargar perfil, historial ni gráfica ni SSE
     }
+
+    // 👇 Si es usuario normal, mostrar todo
+    showProfile();
+    loadHistory();
+    loadChart();
+    initLiveBPM(); // inicializar SSE solo para usuarios
 
   } catch (err) {
     console.error('Error en checkSession:', err);
@@ -47,11 +70,13 @@ async function checkSession() {
 }
 checkSession();
 
-// 📡 SSE para BPM en tiempo real con alerta y persistencia
+// 📡 SSE para BPM en tiempo real con alerta y persistencia (solo usuarios)
 function initLiveBPM() {
   const heartbeatEl = document.getElementById('heartbeat');
   const timestampEl = document.getElementById('timestamp');
   const cardioBox = document.querySelector('.cardio-box');
+
+  if (!heartbeatEl || !timestampEl || !cardioBox) return;
 
   const lastBPM = parseInt(localStorage.getItem('lastBPM'));
   const lastTime = localStorage.getItem('lastTimestamp');
@@ -95,11 +120,10 @@ function initLiveBPM() {
   };
 
   eventSource.onerror = (err) => {
-    console.error("Error en SSE:", err);
+    console.error('Error en SSE:', err);
     eventSource.close();
   };
 }
-initLiveBPM();
 
 // 📌 Logout
 function logout() {
@@ -117,8 +141,10 @@ async function showProfile() {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
-    document.getElementById('profileInfo').innerHTML =
-      `<p>Usuario: ${data.user}</p><p>Device ID: ${data.deviceId}</p>`;
+    const el = document.getElementById('profileInfo');
+    if (el) {
+      el.innerHTML = `<p>Usuario: ${data.user}</p><p>Device ID: ${data.deviceId}</p>`;
+    }
   } catch (err) {
     console.error('Error mostrando perfil:', err);
   }
@@ -134,9 +160,11 @@ async function loadHistory() {
     const lastTen = history.slice(-10);
 
     const list = document.getElementById('historyList');
-    list.innerHTML = lastTen.map(h =>
-      `<li>${h.bpm} bpm - ${new Date(h.timestamp).toLocaleString()}</li>`
-    ).join('');
+    if (list) {
+      list.innerHTML = lastTen.map(h =>
+        `<li>${h.bpm} bpm - ${new Date(h.timestamp).toLocaleString()}</li>`
+      ).join('');
+    }
   } catch (err) {
     console.error('Error cargando historial:', err);
   }
@@ -173,7 +201,10 @@ async function loadChart() {
       bpm < 60 || bpm > 100 ? 'rgba(231, 76, 60, 1)' : 'rgba(46, 204, 113, 1)'
     );
 
-    new Chart(document.getElementById('bpmChart'), {
+    const chartCanvas = document.getElementById('bpmChart');
+    if (!chartCanvas) return;
+
+    new Chart(chartCanvas, {
       type: 'line',
       data: {
         labels,
@@ -218,16 +249,18 @@ async function loadAdminPulses() {
     const data = await res.json();
 
     const table = document.getElementById('adminPulseTable');
+    if (!table) return;
+
     table.innerHTML = data.map(u => `
       <tr>
         <td>${u.user}</td>
         <td>${u.email}</td>
         <td>${u.deviceId}</td>
         <td>${u.role}</td>
-        <td>${u.bpm}</td>
+        <td>${u.bpm ?? 'Sin datos'}</td>
         <td>${u.timestamp ? new Date(u.timestamp).toLocaleString() : '—'}</td>
         <td>
-          <button class="role-button" onclick="toggleRole('${u.email}', '${u.role}')">
+          <button class="action-btn" onclick="toggleRole('${u.email}', '${u.role}')">
             Convertir a ${u.role === 'admin' ? 'usuario' : 'admin'}
           </button>
         </td>
@@ -252,7 +285,7 @@ async function toggleRole(email, currentRole) {
     });
 
     const result = await res.json();
-    alert(result.message);
+    alert(result.message || 'Rol actualizado');
     loadAdminPulses(); // refresca la tabla
   } catch (err) {
     console.error('Error cambiando rol:', err);
@@ -286,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (menuToggle) {
     menuToggle.addEventListener('click', () => {
       const menu = document.getElementById('sideMenu');
-      menu.classList.toggle('active');
+      if (menu) menu.classList.toggle('active');
     });
   }
 });
