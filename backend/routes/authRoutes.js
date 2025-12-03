@@ -15,7 +15,8 @@ router.get('/profile', verifyToken, (req, res) => {
   res.status(200).json({
     authenticated: true,
     user: req.user.name,        // 👈 nombre del usuario
-    deviceId: req.user.deviceId // 👈 deviceId del usuario
+    deviceId: req.user.deviceId, // 👈 deviceId del usuario
+    role: req.user.role
   });
 });
 
