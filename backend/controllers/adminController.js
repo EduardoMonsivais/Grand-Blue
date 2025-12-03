@@ -1,5 +1,5 @@
 const User = require('../models/userModel');
-const Heart = require('../models/heartModel');
+const Heart = require('../models/HeartModel');
 
 // 📌 Ver todos los usuarios y su último BPM
 const getAllUsersPulse = async (req, res) => {
