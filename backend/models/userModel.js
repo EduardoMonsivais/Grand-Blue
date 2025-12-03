@@ -5,7 +5,8 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  deviceId: { type: String, unique: true } // 👈 Nuevo campo para vincular el ESP32
+  deviceId: { type: String, unique: true },
+  role: { type: String, default: 'user' } // 👈 nuevo campo
 });
 
 userSchema.pre('save', async function (next) {

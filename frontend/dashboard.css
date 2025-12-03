@@ -186,3 +186,48 @@ section.active {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ===== Panel de Administrador ===== */
+#adminPanel {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  color: #ecf0f1;
+}
+
+#adminPanel h2 {
+  margin-bottom: 15px;
+  color: #1abc9c;
+  text-align: center;
+  font-size: 22px;
+}
+
+#adminPanel table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#adminPanel th, #adminPanel td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #34495e;
+}
+
+#adminPanel th {
+  background-color: #34495e;
+  color: #ecf0f1;
+  font-weight: bold;
+}
+
+#adminPanel tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+#adminPanel tr:hover {
+  background-color: #1abc9c;
+  color: #fff;
+  transition: background-color 0.3s ease;
+}

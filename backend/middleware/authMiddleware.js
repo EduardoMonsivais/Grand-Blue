@@ -13,18 +13,16 @@ async function verifyToken(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Buscar usuario en la BD para tener todos los datos
     const user = await User.findById(decoded.id);
     if (!user) {
       return res.status(401).json({ error: 'Usuario no encontrado' });
     }
 
-    // Guardamos datos completos en req.user
     req.user = {
       id: user._id,
       name: user.name,
-      deviceId: user.deviceId
+      deviceId: user.deviceId,
+      role: user.role // 👈 ahora incluye rol
     };
 
     next();

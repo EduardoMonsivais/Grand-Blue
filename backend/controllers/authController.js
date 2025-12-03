@@ -2,39 +2,35 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-// 📌 Registro de usuario con deviceId automático
+// 📌 Registro
 const register = async (req, res) => {
   const { name, email, password } = req.body;
-  const deviceId = req.body.deviceId || `ESP32-${Date.now()}`; // 👈 se genera si no se envía
+  const deviceId = req.body.deviceId || `ESP32-${Date.now()}`;
 
   try {
-    // Verificar si ya existe el correo
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ error: 'El correo ya está registrado' });
 
-    // Verificar si el deviceId ya está vinculado
     const existingDevice = await User.findOne({ deviceId });
     if (existingDevice) return res.status(400).json({ error: 'Este deviceId ya está vinculado a otro usuario' });
 
-    // Crear nuevo usuario
-    const newUser = new User({ name, email, password, deviceId });
+    const newUser = new User({ name, email, password, deviceId, role: 'user' });
     await newUser.save();
 
-    // Generar token
     const token = jwt.sign(
-      { id: newUser._id, name: newUser.name },
+      { id: newUser._id, name: newUser.name, role: newUser.role },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '365d' }
     );
 
     res.status(201).json({
       message: 'Usuario registrado exitosamente',
       user: newUser.name,
-      deviceId: newUser.deviceId, // 👈 devolvemos el deviceId
+      deviceId: newUser.deviceId,
+      role: newUser.role,
       token
     });
   } catch (error) {
-    console.error("❌ Error en register:", error);
     res.status(500).json({ error: 'Error del servidor durante el registro' });
   }
 };
@@ -50,19 +46,19 @@ const login = async (req, res) => {
     if (!isValid) return res.status(401).json({ error: 'Contraseña incorrecta' });
 
     const token = jwt.sign(
-      { id: user._id, name: user.name },
+      { id: user._id, name: user.name, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '365d' }
     );
 
     res.status(200).json({
       message: 'Inicio de sesión exitoso',
       user: user.name,
-      deviceId: user.deviceId, // 👈 devolvemos el deviceId
+      deviceId: user.deviceId,
+      role: user.role,
       token
     });
   } catch (error) {
-    console.error("❌ Error en login:", error);
     res.status(500).json({ error: 'Error del servidor durante el inicio de sesión' });
   }
 };
@@ -80,7 +76,8 @@ const verifySession = async (req, res) => {
     res.status(200).json({
       authenticated: true,
       user: user.name,
-      deviceId: user.deviceId // 👈 devolvemos el deviceId
+      deviceId: user.deviceId,
+      role: user.role
     });
   } catch (err) {
     res.status(401).json({ authenticated: false });

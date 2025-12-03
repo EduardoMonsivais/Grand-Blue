@@ -9,6 +9,10 @@ const fs = require('fs');
 const authRoutes = require('./routes/authRoutes');
 const heartRoutes = require('./routes/heartRoutes');
 
+const { getAllUsersPulse, changeUserRole } = require('./controllers/adminController');
+const verifyToken = require('./middleware/verifyToken');
+const isAdmin = require('./middleware/isAdmin');
+
 const app = express();
 
 // 🔍 Verifica que la URI esté definida
@@ -27,11 +31,15 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// 📡 Rutas API primero
-app.use('/api', authRoutes);        // /api/login, /api/register, etc.
-app.use('/api/heart', heartRoutes); // /api/heart, /api/heart/live, etc.
+// 📡 Rutas API
+app.use('/api', authRoutes);
+app.use('/api/heart', heartRoutes);
 
-// 🧪 Ruta de diagnóstico para confirmar que Express responde
+// 📌 Rutas admin
+app.get('/api/admin/pulses', verifyToken, isAdmin, getAllUsersPulse);
+app.post('/api/admin/change-role', verifyToken, isAdmin, changeUserRole);
+
+// 🧪 Ruta de diagnóstico
 app.post('/api/ping', (req, res) => {
   res.json({ ok: true, msg: 'Express responde correctamente' });
 });
@@ -57,7 +65,6 @@ mongoose.connect(process.env.MONGO_URI, {
 })
   .then(() => {
     console.log('✅ Conectado a MongoDB Atlas');
-
     const PORT = process.env.PORT || 10000;
     app.listen(PORT, () =>
       console.log(`🚀 Servidor corriendo en puerto ${PORT}`)

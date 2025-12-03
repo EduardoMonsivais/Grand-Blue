@@ -17,7 +17,6 @@ async function checkSession() {
 
     const data = await res.json();
 
-    // Guardamos automáticamente el deviceId
     if (data.deviceId) {
       localStorage.setItem('deviceId', data.deviceId);
     }
@@ -31,6 +30,16 @@ async function checkSession() {
     showProfile();
     loadHistory();
     loadChart();
+
+    // 👇 Mostrar panel admin si el rol es "admin"
+    if (data.role === 'admin') {
+      const adminPanelEl = document.getElementById('adminPanel');
+      const adminMenuEl = document.getElementById('adminMenu');
+      if (adminPanelEl) adminPanelEl.style.display = 'block';
+      if (adminMenuEl) adminMenuEl.style.display = 'block';
+      loadAdminPulses();
+    }
+
   } catch (err) {
     console.error('Error en checkSession:', err);
     window.location.replace('index.html');
@@ -44,14 +53,13 @@ function initLiveBPM() {
   const timestampEl = document.getElementById('timestamp');
   const cardioBox = document.querySelector('.cardio-box');
 
-  // 🧠 Mostrar último BPM guardado si existe
-  const lastBPM = localStorage.getItem('lastBPM');
+  const lastBPM = parseInt(localStorage.getItem('lastBPM'));
   const lastTime = localStorage.getItem('lastTimestamp');
-  if (lastBPM && lastTime) {
+
+  if (!isNaN(lastBPM) && lastTime) {
     heartbeatEl.textContent = `${lastBPM} bpm`;
     timestampEl.textContent = `Última actualización: ${new Date(lastTime).toLocaleString()}`;
 
-    // 🚨 Mostrar alerta si fuera de rango
     if (lastBPM < 60 || lastBPM > 100) {
       cardioBox.style.backgroundColor = '#e74c3c';
       cardioBox.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.8)';
@@ -64,22 +72,19 @@ function initLiveBPM() {
     timestampEl.textContent = '';
   }
 
-  // 🔄 Conexión SSE
   const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live?token=${token}`);
 
   eventSource.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    const bpm = data.bpm;
+    const bpm = parseInt(data.bpm);
     const time = data.timestamp;
+
+    localStorage.setItem('lastBPM', bpm);
+    localStorage.setItem('lastTimestamp', time);
 
     heartbeatEl.textContent = `${bpm} bpm`;
     timestampEl.textContent = `Última actualización: ${new Date(time).toLocaleString()}`;
 
-    // 💾 Guardar en localStorage
-    localStorage.setItem('lastBPM', bpm);
-    localStorage.setItem('lastTimestamp', time);
-
-    // 🚨 Alerta visual
     if (bpm < 60 || bpm > 100) {
       cardioBox.style.backgroundColor = '#e74c3c';
       cardioBox.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.8)';
@@ -96,7 +101,7 @@ function initLiveBPM() {
 }
 initLiveBPM();
 
-// 📌 Logout (solo menú lateral)
+// 📌 Logout
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('deviceId');
@@ -119,15 +124,13 @@ async function showProfile() {
   }
 }
 
-// 📌 Historial (solo últimos 10 registros)
+// 📌 Historial (últimos 10 registros)
 async function loadHistory() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const history = await res.json();
-
-    // Tomamos solo los últimos 10 registros
     const lastTen = history.slice(-10);
 
     const list = document.getElementById('historyList');
@@ -139,7 +142,7 @@ async function loadHistory() {
   }
 }
 
-// 📌 Gráfica diaria (solo últimos 10 días)
+// 📌 Gráfica diaria (últimos 10 días)
 async function loadChart() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
@@ -161,7 +164,6 @@ async function loadChart() {
       return Math.round(avg);
     });
 
-    // 🚦 Solo últimos 10 días
     if (labels.length > 10) {
       labels = labels.slice(-10);
       data = data.slice(-10);
@@ -207,9 +209,59 @@ async function loadChart() {
   }
 }
 
-// 📌 Mostrar solo una sección a la vez con animación
+// 📌 Admin: cargar pulsos de todos los usuarios
+async function loadAdminPulses() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/pulses`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    const table = document.getElementById('adminPulseTable');
+    table.innerHTML = data.map(u => `
+      <tr>
+        <td>${u.user}</td>
+        <td>${u.email}</td>
+        <td>${u.deviceId}</td>
+        <td>${u.role}</td>
+        <td>${u.bpm}</td>
+        <td>${u.timestamp ? new Date(u.timestamp).toLocaleString() : '—'}</td>
+        <td>
+          <button class="role-button" onclick="toggleRole('${u.email}', '${u.role}')">
+            Convertir a ${u.role === 'admin' ? 'usuario' : 'admin'}
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Error cargando pulsos admin:', err);
+  }
+}
+
+// 📌 Cambiar rol de usuario ↔ admin
+async function toggleRole(email, currentRole) {
+  const newRole = currentRole === 'admin' ? 'user' : 'admin';
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/change-role`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ email, role: newRole })
+    });
+
+    const result = await res.json();
+    alert(result.message);
+    loadAdminPulses(); // refresca la tabla
+  } catch (err) {
+    console.error('Error cambiando rol:', err);
+  }
+}
+
+// 📌 Mostrar sección con animación
 function showSection(sectionId) {
-  const sections = ['profileInfo', 'historyList', 'dailyChart'];
+  const sections = ['profileInfo', 'historyList', 'dailyChart', 'adminPanel'];
   sections.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -224,7 +276,6 @@ function showSection(sectionId) {
     setTimeout(() => target.classList.add('active'), 10);
   }
 
-  // 👇 Cerrar menú automáticamente al seleccionar
   const menu = document.getElementById('sideMenu');
   if (menu) menu.classList.remove('active');
 }
