@@ -10,7 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const heartRoutes = require('./routes/heartRoutes');
 
 const { getAllUsersPulse, changeUserRole } = require('./controllers/adminController');
-const verifyToken = require('./middleware/verifyToken');
+const verifyToken = require('./middleware/authMiddleware');
 const isAdmin = require('./middleware/isAdmin');
 
 const app = express();
