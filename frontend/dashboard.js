@@ -31,25 +31,28 @@ async function checkSession() {
       localStorage.setItem('deviceId', data.deviceId);
     }
 
-    // 👇 Si es admin, ocultar todo lo demás y mostrar solo el panel
+    const welcomeEl = document.getElementById('welcomeMessage');
+    if (welcomeEl) welcomeEl.textContent = `Bienvenido, ${data.user} 👋`;
+
+    const profileNameEl = document.getElementById('profileName');
+    if (profileNameEl) profileNameEl.textContent = data.user; // nombre en el menú lateral
+
+    // 👇 Si es admin, ocultar secciones de usuario y mostrar panel admin + menú
     if (data.role === 'admin') {
-      const elementsToHide = [
-        'bpmTitle',
-        'welcomeMessage',
-        'profileName',
-        'timestamp',
-        'profileInfo',
-        'historyList',
-        'dailyChart'
-      ];
-
-      elementsToHide.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-      });
-
+      const bpmTitle = document.getElementById('bpmTitle');
       const cardioBox = document.querySelector('.cardio-box');
+      const timestampEl = document.getElementById('timestamp');
+      const profileInfoEl = document.getElementById('profileInfo');
+      const historyListEl = document.getElementById('historyList');
+      const chartEl = document.getElementById('dailyChart');
+
+      if (bpmTitle) bpmTitle.style.display = 'none'; // ocultar solo para admin
       if (cardioBox) cardioBox.style.display = 'none';
+      if (timestampEl) timestampEl.style.display = 'none';
+      if (welcomeEl) welcomeEl.style.display = 'none';
+      if (profileInfoEl) profileInfoEl.style.display = 'none';
+      if (historyListEl) historyListEl.style.display = 'none';
+      if (chartEl) chartEl.style.display = 'none';
 
       const adminPanelEl = document.getElementById('adminPanel');
       const adminMenuEl = document.getElementById('adminMenu');
@@ -62,7 +65,7 @@ async function checkSession() {
       if (menuToggle) menuToggle.style.display = 'block';
 
       await loadAdminPulses();
-      showSection('adminPanel'); // activa directamente el panel
+      showSection('adminPanel'); // activar panel directamente
       return;
     }
 
