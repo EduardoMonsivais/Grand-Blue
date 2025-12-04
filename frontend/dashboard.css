@@ -93,15 +93,16 @@ body {
 
 /* Menú hamburguesa */
 .menu-toggle {
-  position: absolute;
+  position: fixed;
   top: 20px;
   left: 20px;
   font-size: 28px;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 1100;
   color: white;
 }
 
+/* === MENÚ LATERAL === */
 .side-menu {
   position: fixed;
   top: 0;
@@ -111,8 +112,9 @@ body {
   background-color: #2c3e50;
   color: white;
   padding: 20px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
   transition: left 0.3s ease;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .side-menu.active {
@@ -144,37 +146,29 @@ body {
   to { opacity: 1; }
 }
 
-.menu-list,
-.extras ul {
+/* Lista del menú */
+.menu-list {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.menu-list li,
-.extras li {
+.menu-list li {
   margin: 15px 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   font-size: 16px;
+  transition: color 0.2s ease;
 }
 
-.menu-list li i,
-.extras li i {
+.menu-list li i {
   margin-right: 10px;
   font-size: 18px;
 }
 
-.menu-list li:hover,
-.extras li:hover {
-  text-decoration: underline;
-}
-
-.extras h3 {
-  margin-top: 30px;
-  font-size: 16px;
-  border-top: 1px solid white;
-  padding-top: 10px;
+.menu-list li:hover {
+  color: #1abc9c;
 }
 
 /* Animación de secciones */
@@ -200,7 +194,7 @@ section.active {
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
   color: #ecf0f1;
   max-width: 900px;
-  overflow-x: auto; /* 👈 permite scroll horizontal en móviles */
+  overflow-x: auto;
 }
 
 #adminPanel h2 {
