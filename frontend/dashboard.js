@@ -65,7 +65,8 @@ async function checkSession() {
       if (sideMenu) sideMenu.style.display = 'block';
       if (menuToggle) menuToggle.style.display = 'block';
 
-      loadAdminPulses();
+      await loadAdminPulses();
+      showSection('adminPanel'); // 👈 activa el panel automáticamente
       return; // No inicializar SSE ni cargar secciones de usuario
     }
 
@@ -225,6 +226,7 @@ async function loadAdminPulses() {
     const res = await fetch(`${API_BASE_URL}/api/admin/pulses`, {
       headers: { Authorization: `Bearer ${token}` }
     });
+    if (!res.ok) throw new Error('No autorizado o error al cargar pulsos');
     const data = await res.json();
 
     const table = document.getElementById('adminPulseTable');
