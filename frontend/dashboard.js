@@ -46,7 +46,10 @@ async function checkSession() {
       const historyListEl = document.getElementById('historyList');
       const chartEl = document.getElementById('dailyChart');
 
-      if (bpmTitle) bpmTitle.style.display = 'none'; // ocultar solo para admin
+      // Eliminar el texto del DOM para que no reaparezca
+      if (bpmTitle) bpmTitle.remove();
+
+      // Ocultar elementos de usuario
       if (cardioBox) cardioBox.style.display = 'none';
       if (timestampEl) timestampEl.style.display = 'none';
       if (welcomeEl) welcomeEl.style.display = 'none';
@@ -54,6 +57,7 @@ async function checkSession() {
       if (historyListEl) historyListEl.style.display = 'none';
       if (chartEl) chartEl.style.display = 'none';
 
+      // Mostrar panel admin y su menú
       const adminPanelEl = document.getElementById('adminPanel');
       const adminMenuEl = document.getElementById('adminMenu');
       if (adminPanelEl) adminPanelEl.style.display = 'block';
@@ -65,8 +69,8 @@ async function checkSession() {
       if (menuToggle) menuToggle.style.display = 'block';
 
       await loadAdminPulses();
-      showSection('adminPanel'); // activar panel directamente
-      return;
+      showSection('adminPanel'); // activa directamente el panel
+      return; // no inicializar SSE ni secciones de usuario
     }
 
     // 👇 Si es usuario normal, mostrar todo
