@@ -3,7 +3,7 @@ const token = localStorage.getItem('token');
 const LOCALE = 'es-MX';
 const TIMEZONE = 'America/Monterrey';
 
-// Utilidad: formatear fecha en zona local
+// Formatear fecha a la zona local de Monterrey (UTC-6)
 function formatLocal(dateLike) {
   try {
     return new Date(dateLike).toLocaleString(LOCALE, { timeZone: TIMEZONE });
@@ -12,21 +12,7 @@ function formatLocal(dateLike) {
   }
 }
 
-// Eliminar el párrafo "Tu ritmo cardíaco en tiempo real:" aunque no tenga id
-function removeHeartTitle() {
-  const container = document.querySelector('.container');
-  if (!container) return;
-  const ps = container.querySelectorAll('p');
-  for (const p of ps) {
-    const text = (p.textContent || '').trim().toLowerCase();
-    if (text.includes('tu ritmo cardíaco en tiempo real')) {
-      p.remove();
-      break;
-    }
-  }
-}
-
-// 📌 Verificar sesión y guardar deviceId automáticamente
+// Verificar sesión y configurar UI según rol
 async function checkSession() {
   if (!token) {
     window.location.replace('index.html');
@@ -41,51 +27,64 @@ async function checkSession() {
 
     const data = await res.json();
 
+    // Guardar deviceId si existe
     if (data.deviceId) {
       localStorage.setItem('deviceId', data.deviceId);
     }
 
+    // Bienvenida y nombre en menú lateral
     const welcomeEl = document.getElementById('welcomeMessage');
     if (welcomeEl) welcomeEl.textContent = `Bienvenido, ${data.user} 👋`;
 
     const profileNameEl = document.getElementById('profileName');
     if (profileNameEl) profileNameEl.textContent = data.user;
 
-    // Mostrar opción admin en menú si corresponde
+    // Mostrar opción "Panel Admin" en el menú si corresponde
     const adminMenuEl = document.getElementById('adminMenu');
     if (adminMenuEl) adminMenuEl.style.display = (data.role === 'admin') ? 'block' : 'none';
 
-    // 👇 Si es admin, ocultar secciones de usuario y mostrar solo el panel admin
+    // Asegurar que el menú y el botón hamburguesa estén visibles
+    const sideMenu = document.getElementById('sideMenu');
+    const menuToggle = document.getElementById('menuToggle');
+    if (sideMenu) sideMenu.style.display = 'block';
+    if (menuToggle) menuToggle.style.display = 'block';
+
+    // Eliminar Ajustes y Extras (Juegos, Acerca de) del menú para todos
+    document.querySelector('li[onclick*="settings"]')?.remove();
+    document.querySelector('.extras')?.remove();
+
+    // Modo admin: ocultar Historial y Gráfica BPM y activar panel admin
     if (data.role === 'admin') {
-      removeHeartTitle(); // elimina el texto del DOM
+      // Eliminar texto de ritmo cardíaco en tiempo real si está presente
+      const container = document.querySelector('.container');
+      if (container) {
+        const ps = container.querySelectorAll('p');
+        for (const p of ps) {
+          const text = (p.textContent || '').trim().toLowerCase();
+          if (text.includes('tu ritmo cardíaco en tiempo real')) {
+            p.remove();
+            break;
+          }
+        }
+      }
 
-      const cardioBox = document.querySelector('.cardio-box');
-      const timestampEl = document.getElementById('timestamp');
-      const profileInfoEl = document.getElementById('profileInfo');
-      const historyListEl = document.getElementById('historyList');
-      const chartEl = document.getElementById('dailyChart');
+      // Ocultar contenido de usuario: historial y gráfica
+      document.getElementById('historyList')?.style.display = 'none';
+      document.getElementById('dailyChart')?.style.display = 'none';
 
-      if (cardioBox) cardioBox.style.display = 'none';
-      if (timestampEl) timestampEl.style.display = 'none';
-      if (welcomeEl) welcomeEl.style.display = 'none';
-      if (profileInfoEl) profileInfoEl.style.display = 'none';
-      if (historyListEl) historyListEl.style.display = 'none';
-      if (chartEl) chartEl.style.display = 'none';
+      // Ocultar opciones del menú lateral correspondientes
+      document.querySelector('li[onclick*="historyList"]')?.style.display = 'none';
+      document.querySelector('li[onclick*="dailyChart"]')?.style.display = 'none';
 
-      const adminPanelEl = document.getElementById('adminPanel');
-      if (adminPanelEl) adminPanelEl.style.display = 'block';
-
-      const sideMenu = document.getElementById('sideMenu');
-      const menuToggle = document.getElementById('menuToggle');
-      if (sideMenu) sideMenu.style.display = 'block';
-      if (menuToggle) menuToggle.style.display = 'block';
+      // Mostrar el panel de administración
+      document.getElementById('adminPanel')?.style.display = 'block';
 
       await loadAdminPulses();
-      showSection('adminPanel');
+      showSection('adminPanel'); // activar visualmente el panel admin
       return;
     }
 
-    // 👇 Si es usuario normal, mostrar todo
+    // Usuario normal: cargar secciones habituales
     showProfile();
     loadHistory();
     loadChart();
@@ -98,7 +97,7 @@ async function checkSession() {
 }
 checkSession();
 
-// 📡 SSE para BPM en tiempo real (solo usuarios)
+// SSE para BPM en tiempo real (solo usuarios)
 function initLiveBPM() {
   const heartbeatEl = document.getElementById('heartbeat');
   const timestampEl = document.getElementById('timestamp');
@@ -114,7 +113,7 @@ function initLiveBPM() {
     cardioBox.style.backgroundColor = (lastBPM < 60 || lastBPM > 100) ? '#e74c3c' : '#1abc9c';
     cardioBox.style.boxShadow = (lastBPM < 60 || lastBPM > 100) ? '0 0 20px rgba(231, 76, 60, 0.8)' : 'none';
   } else {
-    heartbeatEl.textContent = 'Esperando datos...';
+    heartbeatEl.textContent = '-- bpm';
     timestampEl.textContent = '';
   }
 
@@ -138,7 +137,7 @@ function initLiveBPM() {
   };
 }
 
-// 📌 Logout
+// Logout
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('deviceId');
@@ -147,7 +146,7 @@ function logout() {
   window.location.replace('index.html');
 }
 
-// 📌 Mostrar perfil
+// Mostrar perfil
 async function showProfile() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
@@ -155,20 +154,20 @@ async function showProfile() {
     });
     const data = await res.json();
     const el = document.getElementById('profileInfo');
-    if (el) el.innerHTML = `<p>Usuario: ${data.user}</p><p>Device ID: ${data.deviceId}</p>`;
+    if (el) el.innerHTML = `<p>Usuario: ${data.user}</p><p>Device ID: ${data.deviceId || '—'}</p>`;
   } catch (err) {
     console.error('Error mostrando perfil:', err);
   }
 }
 
-// 📌 Historial (últimos 10 registros)
+// Historial (últimos 10 registros)
 async function loadHistory() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const history = await res.json();
-    const lastTen = history.slice(-10);
+    const lastTen = Array.isArray(history) ? history.slice(-10) : [];
 
     const list = document.getElementById('historyList');
     if (list) {
@@ -181,7 +180,7 @@ async function loadHistory() {
   }
 }
 
-// 📌 Gráfica diaria (últimos 10 días)
+// Gráfica diaria (últimos 10 días)
 async function loadChart() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/heart/history`, {
@@ -235,7 +234,7 @@ async function loadChart() {
   }
 }
 
-// 📌 Admin: cargar pulsos de todos los usuarios
+// Admin: cargar pulsos de todos los usuarios
 async function loadAdminPulses() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/pulses`, {
@@ -253,7 +252,7 @@ async function loadAdminPulses() {
         <td>${u.email}</td>
         <td>${u.deviceId || '—'}</td>
         <td>${u.role}</td>
-        <td>${u.bpm !== null && u.bpm !== undefined ? u.bpm : 'Sin datos'}</td>
+        <td>${(u.bpm !== null && u.bpm !== undefined) ? u.bpm : 'Sin datos'}</td>
         <td>${u.timestamp ? formatLocal(u.timestamp) : '—'}</td>
         <td>
           <button class="action-btn" onclick="toggleRole('${u.email}', '${u.role}')">
@@ -267,7 +266,7 @@ async function loadAdminPulses() {
   }
 }
 
-// 📌 Cambiar rol de usuario ↔ admin
+// Cambiar rol de usuario ↔ admin
 async function toggleRole(email, currentRole) {
   const newRole = currentRole === 'admin' ? 'user' : 'admin';
   try {
@@ -282,13 +281,13 @@ async function toggleRole(email, currentRole) {
 
     const result = await res.json();
     alert(result.message || 'Rol actualizado');
-    loadAdminPulses(); // refresca la tabla
+    loadAdminPulses(); // refrescar tabla
   } catch (err) {
     console.error('Error cambiando rol:', err);
   }
 }
 
-// 📌 Mostrar sección con animación
+// Mostrar sección con animación y cerrar menú lateral
 function showSection(sectionId) {
   const sections = ['profileInfo', 'historyList', 'dailyChart', 'adminPanel'];
   sections.forEach(id => {
@@ -309,7 +308,7 @@ function showSection(sectionId) {
   if (menu) menu.classList.remove('active');
 }
 
-// 📌 Menú hamburguesa
+// Menú hamburguesa
 document.addEventListener('DOMContentLoaded', () => {
   const menuToggle = document.getElementById('menuToggle');
   if (menuToggle) {
