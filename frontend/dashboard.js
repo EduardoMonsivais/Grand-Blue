@@ -12,6 +12,20 @@ function formatLocal(dateLike) {
   }
 }
 
+// Eliminar el párrafo "Tu ritmo cardíaco en tiempo real:" aunque no tenga id
+function removeHeartTitle() {
+  const container = document.querySelector('.container');
+  if (!container) return;
+  const ps = container.querySelectorAll('p');
+  for (const p of ps) {
+    const text = (p.textContent || '').trim().toLowerCase();
+    if (text.includes('tu ritmo cardíaco en tiempo real')) {
+      p.remove();
+      break;
+    }
+  }
+}
+
 // 📌 Verificar sesión y guardar deviceId automáticamente
 async function checkSession() {
   if (!token) {
@@ -35,21 +49,22 @@ async function checkSession() {
     if (welcomeEl) welcomeEl.textContent = `Bienvenido, ${data.user} 👋`;
 
     const profileNameEl = document.getElementById('profileName');
-    if (profileNameEl) profileNameEl.textContent = data.user; // nombre en el menú lateral
+    if (profileNameEl) profileNameEl.textContent = data.user;
 
-    // 👇 Si es admin, ocultar secciones de usuario y mostrar panel admin + menú
+    // Mostrar opción admin en menú si corresponde
+    const adminMenuEl = document.getElementById('adminMenu');
+    if (adminMenuEl) adminMenuEl.style.display = (data.role === 'admin') ? 'block' : 'none';
+
+    // 👇 Si es admin, ocultar secciones de usuario y mostrar solo el panel admin
     if (data.role === 'admin') {
-      const bpmTitle = document.getElementById('bpmTitle');
+      removeHeartTitle(); // elimina el texto del DOM
+
       const cardioBox = document.querySelector('.cardio-box');
       const timestampEl = document.getElementById('timestamp');
       const profileInfoEl = document.getElementById('profileInfo');
       const historyListEl = document.getElementById('historyList');
       const chartEl = document.getElementById('dailyChart');
 
-      // Eliminar el texto del DOM para que no reaparezca
-      if (bpmTitle) bpmTitle.remove();
-
-      // Ocultar elementos de usuario
       if (cardioBox) cardioBox.style.display = 'none';
       if (timestampEl) timestampEl.style.display = 'none';
       if (welcomeEl) welcomeEl.style.display = 'none';
@@ -57,11 +72,8 @@ async function checkSession() {
       if (historyListEl) historyListEl.style.display = 'none';
       if (chartEl) chartEl.style.display = 'none';
 
-      // Mostrar panel admin y su menú
       const adminPanelEl = document.getElementById('adminPanel');
-      const adminMenuEl = document.getElementById('adminMenu');
       if (adminPanelEl) adminPanelEl.style.display = 'block';
-      if (adminMenuEl) adminMenuEl.style.display = 'block';
 
       const sideMenu = document.getElementById('sideMenu');
       const menuToggle = document.getElementById('menuToggle');
@@ -69,8 +81,8 @@ async function checkSession() {
       if (menuToggle) menuToggle.style.display = 'block';
 
       await loadAdminPulses();
-      showSection('adminPanel'); // activa directamente el panel
-      return; // no inicializar SSE ni secciones de usuario
+      showSection('adminPanel');
+      return;
     }
 
     // 👇 Si es usuario normal, mostrar todo
