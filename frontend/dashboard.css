@@ -5,7 +5,7 @@ body {
   min-height: 100vh;
   margin: 0;
   padding-top: 40px;
-  display: block; /* 👈 evita que el menú se vea salido */
+  display: block; /* evita que el menú se vea salido */
 }
 
 /* Cuando el menú está abierto, el contenido se desplaza */
@@ -26,7 +26,7 @@ body.menu-open .container {
   margin: 0 auto;
 }
 
-/* Bloque de ritmo cardíaco (solo visible para usuarios) */
+/* Bloque de ritmo cardíaco */
 .cardio-box {
   margin-top: 20px;
   padding: 30px;
@@ -129,11 +129,17 @@ body.menu-open .container {
   margin-bottom: 20px;
 }
 
+/* Ícono de usuario (Font Awesome) */
 .profile-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
+  font-size: 60px;
+  color: white;
   margin-bottom: 10px;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.profile-icon:hover {
+  color: #1abc9c;
+  transform: scale(1.1);
 }
 
 .profile-name {
@@ -162,17 +168,27 @@ body.menu-open .container {
   display: flex;
   align-items: center;
   font-size: 16px;
+  transition: color 0.3s ease;
 }
 
 .menu-list li i,
 .extras li i {
   margin-right: 10px;
   font-size: 18px;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+/* Hover animado para íconos del menú */
+.menu-list li:hover i,
+.extras li:hover i {
+  color: #1abc9c;
+  transform: scale(1.2);
 }
 
 .menu-list li:hover,
 .extras li:hover {
   text-decoration: underline;
+  color: #1abc9c;
 }
 
 .extras h3 {
