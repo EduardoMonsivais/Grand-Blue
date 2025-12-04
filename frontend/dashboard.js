@@ -28,7 +28,7 @@ async function checkSession() {
     const profileNameEl = document.getElementById('profileName');
     if (profileNameEl) profileNameEl.textContent = data.user;
 
-    // Si es admin, ocultar todo excepto el panel admin
+    // 👇 Si es admin, ocultar secciones de usuario y mostrar panel admin + menú
     if (data.role === 'admin') {
       const adminPanelEl = document.getElementById('adminPanel');
       const adminMenuEl = document.getElementById('adminMenu');
@@ -49,17 +49,16 @@ async function checkSession() {
       if (adminPanelEl) adminPanelEl.style.display = 'block';
       if (adminMenuEl) adminMenuEl.style.display = 'block';
 
-      // Opcional: ocultar menú lateral para admins
       const sideMenu = document.getElementById('sideMenu');
       const menuToggle = document.getElementById('menuToggle');
-      if (sideMenu) sideMenu.style.display = 'none';
-      if (menuToggle) menuToggle.style.display = 'none';
+      if (sideMenu) sideMenu.style.display = 'block';
+      if (menuToggle) menuToggle.style.display = 'block';
 
       loadAdminPulses();
-      return; // no cargar perfil, historial, gráfica ni SSE
+      return;
     }
 
-    // Usuario normal: cargar todo
+    // 👇 Si es usuario normal, mostrar todo
     showProfile();
     loadHistory();
     loadChart();
@@ -85,20 +84,14 @@ function initLiveBPM() {
   if (!isNaN(lastBPM) && lastTime) {
     heartbeatEl.textContent = `${lastBPM} bpm`;
     timestampEl.textContent = `Última actualización: ${new Date(lastTime).toLocaleString(LOCALE, { timeZone: TIMEZONE })}`;
-    if (lastBPM < 60 || lastBPM > 100) {
-      cardioBox.style.backgroundColor = '#e74c3c';
-      cardioBox.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.8)';
-    } else {
-      cardioBox.style.backgroundColor = '#1abc9c';
-      cardioBox.style.boxShadow = 'none';
-    }
+    cardioBox.style.backgroundColor = (lastBPM < 60 || lastBPM > 100) ? '#e74c3c' : '#1abc9c';
+    cardioBox.style.boxShadow = (lastBPM < 60 || lastBPM > 100) ? '0 0 20px rgba(231, 76, 60, 0.8)' : 'none';
   } else {
     heartbeatEl.textContent = 'Esperando datos...';
     timestampEl.textContent = '';
   }
 
   const eventSource = new EventSource(`${API_BASE_URL}/api/heart/live?token=${token}`);
-
   eventSource.onmessage = (event) => {
     const data = JSON.parse(event.data);
     const bpm = parseInt(data.bpm);
@@ -109,16 +102,9 @@ function initLiveBPM() {
 
     heartbeatEl.textContent = `${bpm} bpm`;
     timestampEl.textContent = `Última actualización: ${new Date(time).toLocaleString(LOCALE, { timeZone: TIMEZONE })}`;
-
-    if (bpm < 60 || bpm > 100) {
-      cardioBox.style.backgroundColor = '#e74c3c';
-      cardioBox.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.8)';
-    } else {
-      cardioBox.style.backgroundColor = '#1abc9c';
-      cardioBox.style.boxShadow = 'none';
-    }
+    cardioBox.style.backgroundColor = (bpm < 60 || bpm > 100) ? '#e74c3c' : '#1abc9c';
+    cardioBox.style.boxShadow = (bpm < 60 || bpm > 100) ? '0 0 20px rgba(231, 76, 60, 0.8)' : 'none';
   };
-
   eventSource.onerror = (err) => {
     console.error('Error en SSE:', err);
     eventSource.close();
@@ -142,9 +128,7 @@ async function showProfile() {
     });
     const data = await res.json();
     const el = document.getElementById('profileInfo');
-    if (el) {
-      el.innerHTML = `<p>Usuario: ${data.user}</p><p>Device ID: ${data.deviceId}</p>`;
-    }
+    if (el) el.innerHTML = `<p>Usuario: ${data.user}</p><p>Device ID: ${data.deviceId}</p>`;
   } catch (err) {
     console.error('Error mostrando perfil:', err);
   }
@@ -220,17 +204,8 @@ async function loadChart() {
         }]
       },
       options: {
-        scales: {
-          y: {
-            beginAtZero: true,
-            suggestedMax: 120
-          }
-        },
-        plugins: {
-          legend: {
-            labels: { color: 'white' }
-          }
-        }
+        scales: { y: { beginAtZero: true, suggestedMax: 120 } },
+        plugins: { legend: { labels: { color: 'white' } } }
       }
     });
   } catch (err) {
