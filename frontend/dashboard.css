@@ -2,12 +2,16 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
   color: white;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
   min-height: 100vh;
   margin: 0;
   padding-top: 40px;
+  display: block; /* 👈 evita que el menú se vea salido */
+}
+
+/* Cuando el menú está abierto, el contenido se desplaza */
+body.menu-open .container {
+  margin-left: 260px;
+  transition: margin-left 0.3s ease;
 }
 
 .container {
@@ -19,6 +23,7 @@ body {
   position: relative;
   width: 100%;
   max-width: 1000px;
+  margin: 0 auto;
 }
 
 /* Bloque de ritmo cardíaco (solo visible para usuarios) */
@@ -93,12 +98,12 @@ body {
 
 /* Menú hamburguesa */
 .menu-toggle {
-  position: absolute;
+  position: fixed;
   top: 20px;
   left: 20px;
   font-size: 28px;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 1100;
   color: white;
 }
 
@@ -112,7 +117,7 @@ body {
   color: white;
   padding: 20px;
   transition: left 0.3s ease;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .side-menu.active {
@@ -200,7 +205,9 @@ section.active {
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
   color: #ecf0f1;
   max-width: 900px;
-  overflow-x: auto; /* 👈 permite scroll horizontal en móviles */
+  overflow-x: auto;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 #adminPanel h2 {
