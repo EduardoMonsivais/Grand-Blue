@@ -31,32 +31,28 @@ async function checkSession() {
       localStorage.setItem('deviceId', data.deviceId);
     }
 
-    const welcomeEl = document.getElementById('welcomeMessage');
-    if (welcomeEl) welcomeEl.textContent = `Bienvenido, ${data.user} 👋`;
-
-    const profileNameEl = document.getElementById('profileName');
-    if (profileNameEl) profileNameEl.textContent = data.user;
-
-    // 👇 Si es admin, ocultar secciones de usuario y mostrar panel admin + menú
+    // 👇 Si es admin, ocultar todo lo demás y mostrar solo el panel
     if (data.role === 'admin') {
+      const elementsToHide = [
+        'bpmTitle',
+        'welcomeMessage',
+        'profileName',
+        'timestamp',
+        'profileInfo',
+        'historyList',
+        'dailyChart'
+      ];
+
+      elementsToHide.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+
+      const cardioBox = document.querySelector('.cardio-box');
+      if (cardioBox) cardioBox.style.display = 'none';
+
       const adminPanelEl = document.getElementById('adminPanel');
       const adminMenuEl = document.getElementById('adminMenu');
-
-      const bpmTitle = document.getElementById('bpmTitle'); // asegúrate de tener <p id="bpmTitle"> en tu HTML
-      const cardioBox = document.querySelector('.cardio-box');
-      const timestampEl = document.getElementById('timestamp');
-      const profileInfoEl = document.getElementById('profileInfo');
-      const historyListEl = document.getElementById('historyList');
-      const chartEl = document.getElementById('dailyChart');
-
-      if (bpmTitle) bpmTitle.style.display = 'none';
-      if (cardioBox) cardioBox.style.display = 'none';
-      if (timestampEl) timestampEl.style.display = 'none';
-      if (welcomeEl) welcomeEl.style.display = 'none';
-      if (profileInfoEl) profileInfoEl.style.display = 'none';
-      if (historyListEl) historyListEl.style.display = 'none';
-      if (chartEl) chartEl.style.display = 'none';
-
       if (adminPanelEl) adminPanelEl.style.display = 'block';
       if (adminMenuEl) adminMenuEl.style.display = 'block';
 
@@ -66,8 +62,8 @@ async function checkSession() {
       if (menuToggle) menuToggle.style.display = 'block';
 
       await loadAdminPulses();
-      showSection('adminPanel'); // 👈 activa el panel automáticamente
-      return; // No inicializar SSE ni cargar secciones de usuario
+      showSection('adminPanel'); // activa directamente el panel
+      return;
     }
 
     // 👇 Si es usuario normal, mostrar todo
