@@ -3,7 +3,7 @@ const token = localStorage.getItem('token');
 const LOCALE = 'es-MX';
 const TIMEZONE = 'America/Monterrey';
 
-// Formatear fecha a la zona local de Monterrey (UTC-6)
+// Formatea fecha/hora a la zona local de Monterrey (UTC-6)
 function formatLocal(dateLike) {
   try {
     return new Date(dateLike).toLocaleString(LOCALE, { timeZone: TIMEZONE });
@@ -50,10 +50,11 @@ async function checkSession() {
     if (menuToggle) menuToggle.style.display = 'block';
 
     // Eliminar Ajustes y Extras (Juegos, Acerca de) del menú para todos
-    document.querySelector('li[onclick*="settings"]')?.remove();
-    document.querySelector('.extras')?.remove();
+    const ajustesItem = document.querySelector('li[onclick*="settings"]');
+    if (ajustesItem) ajustesItem.remove();
+    const extrasBlock = document.querySelector('.extras');
+    if (extrasBlock) extrasBlock.remove();
 
-    // Modo admin: ocultar Historial y Gráfica BPM y activar panel admin
     if (data.role === 'admin') {
       // Eliminar texto de ritmo cardíaco en tiempo real si está presente
       const container = document.querySelector('.container');
@@ -69,15 +70,20 @@ async function checkSession() {
       }
 
       // Ocultar contenido de usuario: historial y gráfica
-      document.getElementById('historyList')?.style.display = 'none';
-      document.getElementById('dailyChart')?.style.display = 'none';
+      const historyEl = document.getElementById('historyList');
+      if (historyEl) historyEl.style.display = 'none';
+      const chartEl = document.getElementById('dailyChart');
+      if (chartEl) chartEl.style.display = 'none';
 
       // Ocultar opciones del menú lateral correspondientes
-      document.querySelector('li[onclick*="historyList"]')?.style.display = 'none';
-      document.querySelector('li[onclick*="dailyChart"]')?.style.display = 'none';
+      const historyMenuItem = document.querySelector('li[onclick*="historyList"]');
+      if (historyMenuItem) historyMenuItem.style.display = 'none';
+      const chartMenuItem = document.querySelector('li[onclick*="dailyChart"]');
+      if (chartMenuItem) chartMenuItem.style.display = 'none';
 
       // Mostrar el panel de administración
-      document.getElementById('adminPanel')?.style.display = 'block';
+      const adminPanelEl = document.getElementById('adminPanel');
+      if (adminPanelEl) adminPanelEl.style.display = 'block';
 
       await loadAdminPulses();
       showSection('adminPanel'); // activar visualmente el panel admin
