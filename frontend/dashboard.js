@@ -26,7 +26,7 @@ function removeHeartTitle() {
   }
 }
 
-// 📌 Verificar sesión y guardar deviceId automáticamente
+// 📌 Verificar sesión y configurar UI según rol
 async function checkSession() {
   if (!token) {
     window.location.replace('index.html');
@@ -57,7 +57,7 @@ async function checkSession() {
 
     // 👇 Si es admin, ocultar secciones de usuario y mostrar solo el panel admin
     if (data.role === 'admin') {
-      removeHeartTitle(); // elimina el texto del DOM
+      removeHeartTitle();
 
       const cardioBox = document.querySelector('.cardio-box');
       const timestampEl = document.getElementById('timestamp');
@@ -71,6 +71,10 @@ async function checkSession() {
       if (profileInfoEl) profileInfoEl.style.display = 'none';
       if (historyListEl) historyListEl.style.display = 'none';
       if (chartEl) chartEl.style.display = 'none';
+
+      // ✅ Ocultar opciones del menú lateral para admins
+      document.querySelector('li[onclick*="historyList"]')?.style.display = 'none';
+      document.querySelector('li[onclick*="dailyChart"]')?.style.display = 'none';
 
       const adminPanelEl = document.getElementById('adminPanel');
       if (adminPanelEl) adminPanelEl.style.display = 'block';
