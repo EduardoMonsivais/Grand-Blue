@@ -1,4 +1,4 @@
-const VERSION = '0.4';
+const VERSION = '0.5'; // 👈 sube versión cuando cambies archivos
 const CACHE_NAME = `cache-${VERSION}`;
 
 const appshell = [
@@ -37,7 +37,7 @@ self.addEventListener("install", (event) => {
         console.log("✅ Todos los archivos cacheados correctamente");
       }
 
-      return self.skipWaiting();
+      return self.skipWaiting(); // activa inmediatamente
     })
   );
 });
@@ -53,19 +53,18 @@ self.addEventListener("activate", (event) => {
       );
     }).then(() => {
       console.log("🔄 Service Worker activado y cachés antiguas eliminadas");
-      return self.clients.claim();
+      return self.clients.claim(); // toma control inmediato
     })
   );
 });
 
-// 📌 Estrategia de fetch
+// 📌 Estrategia de fetch: network-first
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // 🚫 No interceptar APIs dinámicas ni SSE ni dashboard.html
+  // 🚫 No interceptar APIs dinámicas ni SSE
   if (
     url.pathname.startsWith('/api/') ||
-    url.pathname === '/dashboard.html' ||
     event.request.headers.get('accept') === 'text/event-stream'
   ) {
     return; // dejar que el navegador lo maneje directamente
@@ -75,24 +74,24 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Si la red responde, actualiza cache
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        });
+      })
+      .catch(() => {
+        // Si falla la red, usa cache
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
 
-      return fetch(event.request)
-        .then((networkResponse) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        })
-        .catch(() => {
           // Fallback solo para HTML
           if (event.request.headers.get("accept")?.includes("text/html")) {
             return caches.match('/index.html');
           }
         });
-    })
+      })
   );
 });
