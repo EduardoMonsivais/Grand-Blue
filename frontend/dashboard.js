@@ -3,6 +3,15 @@ const token = localStorage.getItem('token');
 const LOCALE = 'es-MX';
 const TIMEZONE = 'America/Monterrey';
 
+// Utilidad: formatear fecha en zona local
+function formatLocal(dateLike) {
+  try {
+    return new Date(dateLike).toLocaleString(LOCALE, { timeZone: TIMEZONE });
+  } catch {
+    return '';
+  }
+}
+
 // 📌 Verificar sesión y guardar deviceId automáticamente
 async function checkSession() {
   if (!token) {
@@ -33,12 +42,14 @@ async function checkSession() {
       const adminPanelEl = document.getElementById('adminPanel');
       const adminMenuEl = document.getElementById('adminMenu');
 
+      const bpmTitle = document.getElementById('bpmTitle'); // asegúrate de tener <p id="bpmTitle"> en tu HTML
       const cardioBox = document.querySelector('.cardio-box');
       const timestampEl = document.getElementById('timestamp');
       const profileInfoEl = document.getElementById('profileInfo');
       const historyListEl = document.getElementById('historyList');
       const chartEl = document.getElementById('dailyChart');
 
+      if (bpmTitle) bpmTitle.style.display = 'none';
       if (cardioBox) cardioBox.style.display = 'none';
       if (timestampEl) timestampEl.style.display = 'none';
       if (welcomeEl) welcomeEl.style.display = 'none';
@@ -55,7 +66,7 @@ async function checkSession() {
       if (menuToggle) menuToggle.style.display = 'block';
 
       loadAdminPulses();
-      return;
+      return; // No inicializar SSE ni cargar secciones de usuario
     }
 
     // 👇 Si es usuario normal, mostrar todo
@@ -83,7 +94,7 @@ function initLiveBPM() {
 
   if (!isNaN(lastBPM) && lastTime) {
     heartbeatEl.textContent = `${lastBPM} bpm`;
-    timestampEl.textContent = `Última actualización: ${new Date(lastTime).toLocaleString(LOCALE, { timeZone: TIMEZONE })}`;
+    timestampEl.textContent = `Última actualización: ${formatLocal(lastTime)}`;
     cardioBox.style.backgroundColor = (lastBPM < 60 || lastBPM > 100) ? '#e74c3c' : '#1abc9c';
     cardioBox.style.boxShadow = (lastBPM < 60 || lastBPM > 100) ? '0 0 20px rgba(231, 76, 60, 0.8)' : 'none';
   } else {
@@ -101,7 +112,7 @@ function initLiveBPM() {
     localStorage.setItem('lastTimestamp', time);
 
     heartbeatEl.textContent = `${bpm} bpm`;
-    timestampEl.textContent = `Última actualización: ${new Date(time).toLocaleString(LOCALE, { timeZone: TIMEZONE })}`;
+    timestampEl.textContent = `Última actualización: ${formatLocal(time)}`;
     cardioBox.style.backgroundColor = (bpm < 60 || bpm > 100) ? '#e74c3c' : '#1abc9c';
     cardioBox.style.boxShadow = (bpm < 60 || bpm > 100) ? '0 0 20px rgba(231, 76, 60, 0.8)' : 'none';
   };
@@ -146,7 +157,7 @@ async function loadHistory() {
     const list = document.getElementById('historyList');
     if (list) {
       list.innerHTML = lastTen.map(h =>
-        `<li>${h.bpm} bpm - ${new Date(h.timestamp).toLocaleString(LOCALE, { timeZone: TIMEZONE })}</li>`
+        `<li>${h.bpm} bpm - ${formatLocal(h.timestamp)}</li>`
       ).join('');
     }
   } catch (err) {
@@ -181,10 +192,6 @@ async function loadChart() {
       data = data.slice(-10);
     }
 
-    const bgColors = data.map(bpm =>
-      bpm < 60 || bpm > 100 ? 'rgba(231, 76, 60, 1)' : 'rgba(46, 204, 113, 1)'
-    );
-
     const chartCanvas = document.getElementById('bpmChart');
     if (!chartCanvas) return;
 
@@ -199,8 +206,7 @@ async function loadChart() {
           backgroundColor: 'rgba(52, 152, 219, 0.2)',
           fill: true,
           tension: 0.3,
-          pointRadius: 4,
-          pointBackgroundColor: bgColors
+          pointRadius: 4
         }]
       },
       options: {
@@ -228,12 +234,10 @@ async function loadAdminPulses() {
       <tr>
         <td>${u.user}</td>
         <td>${u.email}</td>
-        <td>${u.deviceId}</td>
+        <td>${u.deviceId || '—'}</td>
         <td>${u.role}</td>
-        <td>${u.bpm !== null ? u.bpm : 'Sin datos'}</td>
-        <td>${u.timestamp
-              ? new Date(u.timestamp).toLocaleString(LOCALE, { timeZone: TIMEZONE })
-              : '—'}</td>
+        <td>${u.bpm !== null && u.bpm !== undefined ? u.bpm : 'Sin datos'}</td>
+        <td>${u.timestamp ? formatLocal(u.timestamp) : '—'}</td>
         <td>
           <button class="action-btn" onclick="toggleRole('${u.email}', '${u.role}')">
             Convertir a ${u.role === 'admin' ? 'usuario' : 'admin'}

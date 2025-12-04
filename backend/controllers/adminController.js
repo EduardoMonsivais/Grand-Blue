@@ -8,14 +8,16 @@ const getAllUsersPulse = async (req, res) => {
     const result = [];
 
     for (const u of users) {
-      const lastPulse = await Heart.findOne({ deviceId: u.deviceId }).sort({ timestamp: -1 });
+      // ✅ Buscar por userId en lugar de deviceId
+      const lastPulse = await Heart.findOne({ userId: u._id }).sort({ timestamp: -1 });
+
       result.push({
         user: u.name,
         email: u.email,
-        deviceId: u.deviceId,
+        deviceId: u.deviceId, // se sigue mostrando el deviceId del usuario
         role: u.role,
-        bpm: lastPulse ? lastPulse.bpm : null, // 👈 numérico o null
-        timestamp: lastPulse ? lastPulse.timestamp : null // 👈 UTC, se ajusta en frontend
+        bpm: lastPulse ? lastPulse.bpm : null,
+        timestamp: lastPulse ? lastPulse.timestamp : null
       });
     }
 
