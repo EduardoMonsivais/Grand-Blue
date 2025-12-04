@@ -14,13 +14,14 @@ const getAllUsersPulse = async (req, res) => {
         email: u.email,
         deviceId: u.deviceId,
         role: u.role,
-        bpm: lastPulse ? lastPulse.bpm : 'Sin datos',
-        timestamp: lastPulse ? lastPulse.timestamp : null
+        bpm: lastPulse ? lastPulse.bpm : null, // 👈 numérico o null
+        timestamp: lastPulse ? lastPulse.timestamp : null // 👈 UTC, se ajusta en frontend
       });
     }
 
     res.json(result);
   } catch (err) {
+    console.error('Error en getAllUsersPulse:', err);
     res.status(500).json({ error: 'Error obteniendo pulsos' });
   }
 };
@@ -32,6 +33,7 @@ const changeUserRole = async (req, res) => {
     await User.updateOne({ email }, { $set: { role } });
     res.json({ message: `Rol de ${email} actualizado a ${role}` });
   } catch (err) {
+    console.error('Error en changeUserRole:', err);
     res.status(500).json({ error: 'Error actualizando rol' });
   }
 };

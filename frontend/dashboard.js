@@ -1,5 +1,7 @@
 const API_BASE_URL = 'https://health-sen.onrender.com';
 const token = localStorage.getItem('token');
+const LOCALE = 'es-MX';
+const TIMEZONE = 'America/Monterrey';
 
 // 📌 Verificar sesión y guardar deviceId automáticamente
 async function checkSession() {
@@ -12,7 +14,6 @@ async function checkSession() {
     const res = await fetch(`${API_BASE_URL}/api/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-
     if (!res.ok) throw new Error('Sesión no válida');
 
     const data = await res.json();
@@ -22,19 +23,16 @@ async function checkSession() {
     }
 
     const welcomeEl = document.getElementById('welcomeMessage');
-    if (welcomeEl) {
-      welcomeEl.textContent = `Bienvenido, ${data.user} 👋`;
-    }
+    if (welcomeEl) welcomeEl.textContent = `Bienvenido, ${data.user} 👋`;
 
     const profileNameEl = document.getElementById('profileName');
     if (profileNameEl) profileNameEl.textContent = data.user;
 
-    // 👇 Si es admin, ocultar todo excepto el panel admin
+    // Si es admin, ocultar todo excepto el panel admin
     if (data.role === 'admin') {
       const adminPanelEl = document.getElementById('adminPanel');
       const adminMenuEl = document.getElementById('adminMenu');
 
-      // Ocultar secciones de usuario
       const cardioBox = document.querySelector('.cardio-box');
       const timestampEl = document.getElementById('timestamp');
       const profileInfoEl = document.getElementById('profileInfo');
@@ -48,20 +46,24 @@ async function checkSession() {
       if (historyListEl) historyListEl.style.display = 'none';
       if (chartEl) chartEl.style.display = 'none';
 
-      // Mostrar panel admin
       if (adminPanelEl) adminPanelEl.style.display = 'block';
       if (adminMenuEl) adminMenuEl.style.display = 'block';
 
-      // Cargar tabla admin
+      // Opcional: ocultar menú lateral para admins
+      const sideMenu = document.getElementById('sideMenu');
+      const menuToggle = document.getElementById('menuToggle');
+      if (sideMenu) sideMenu.style.display = 'none';
+      if (menuToggle) menuToggle.style.display = 'none';
+
       loadAdminPulses();
-      return; // 👈 no cargar perfil, historial ni gráfica ni SSE
+      return; // no cargar perfil, historial, gráfica ni SSE
     }
 
-    // 👇 Si es usuario normal, mostrar todo
+    // Usuario normal: cargar todo
     showProfile();
     loadHistory();
     loadChart();
-    initLiveBPM(); // inicializar SSE solo para usuarios
+    initLiveBPM();
 
   } catch (err) {
     console.error('Error en checkSession:', err);
@@ -70,12 +72,11 @@ async function checkSession() {
 }
 checkSession();
 
-// 📡 SSE para BPM en tiempo real con alerta y persistencia (solo usuarios)
+// 📡 SSE para BPM en tiempo real (solo usuarios)
 function initLiveBPM() {
   const heartbeatEl = document.getElementById('heartbeat');
   const timestampEl = document.getElementById('timestamp');
   const cardioBox = document.querySelector('.cardio-box');
-
   if (!heartbeatEl || !timestampEl || !cardioBox) return;
 
   const lastBPM = parseInt(localStorage.getItem('lastBPM'));
@@ -83,8 +84,7 @@ function initLiveBPM() {
 
   if (!isNaN(lastBPM) && lastTime) {
     heartbeatEl.textContent = `${lastBPM} bpm`;
-    timestampEl.textContent = `Última actualización: ${new Date(lastTime).toLocaleString()}`;
-
+    timestampEl.textContent = `Última actualización: ${new Date(lastTime).toLocaleString(LOCALE, { timeZone: TIMEZONE })}`;
     if (lastBPM < 60 || lastBPM > 100) {
       cardioBox.style.backgroundColor = '#e74c3c';
       cardioBox.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.8)';
@@ -108,7 +108,7 @@ function initLiveBPM() {
     localStorage.setItem('lastTimestamp', time);
 
     heartbeatEl.textContent = `${bpm} bpm`;
-    timestampEl.textContent = `Última actualización: ${new Date(time).toLocaleString()}`;
+    timestampEl.textContent = `Última actualización: ${new Date(time).toLocaleString(LOCALE, { timeZone: TIMEZONE })}`;
 
     if (bpm < 60 || bpm > 100) {
       cardioBox.style.backgroundColor = '#e74c3c';
@@ -162,7 +162,7 @@ async function loadHistory() {
     const list = document.getElementById('historyList');
     if (list) {
       list.innerHTML = lastTen.map(h =>
-        `<li>${h.bpm} bpm - ${new Date(h.timestamp).toLocaleString()}</li>`
+        `<li>${h.bpm} bpm - ${new Date(h.timestamp).toLocaleString(LOCALE, { timeZone: TIMEZONE })}</li>`
       ).join('');
     }
   } catch (err) {
@@ -180,7 +180,7 @@ async function loadChart() {
 
     const grouped = {};
     history.forEach(h => {
-      const date = new Date(h.timestamp).toLocaleDateString();
+      const date = new Date(h.timestamp).toLocaleDateString(LOCALE, { timeZone: TIMEZONE });
       if (!grouped[date]) grouped[date] = [];
       grouped[date].push(h.bpm);
     });
@@ -228,9 +228,7 @@ async function loadChart() {
         },
         plugins: {
           legend: {
-            labels: {
-              color: 'white'
-            }
+            labels: { color: 'white' }
           }
         }
       }
@@ -257,8 +255,10 @@ async function loadAdminPulses() {
         <td>${u.email}</td>
         <td>${u.deviceId}</td>
         <td>${u.role}</td>
-        <td>${u.bpm ?? 'Sin datos'}</td>
-        <td>${u.timestamp ? new Date(u.timestamp).toLocaleString() : '—'}</td>
+        <td>${u.bpm !== null ? u.bpm : 'Sin datos'}</td>
+        <td>${u.timestamp
+              ? new Date(u.timestamp).toLocaleString(LOCALE, { timeZone: TIMEZONE })
+              : '—'}</td>
         <td>
           <button class="action-btn" onclick="toggleRole('${u.email}', '${u.role}')">
             Convertir a ${u.role === 'admin' ? 'usuario' : 'admin'}
