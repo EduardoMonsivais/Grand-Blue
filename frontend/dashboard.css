@@ -1,3 +1,4 @@
+/* === ESTRUCTURA GENERAL === */
 body {
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
@@ -21,77 +22,7 @@ body {
   max-width: 1000px;
 }
 
-/* Bloque de ritmo cardíaco (solo visible para usuarios) */
-.cardio-box {
-  margin-top: 20px;
-  padding: 30px;
-  background-color: #1abc9c;
-  border-radius: 10px;
-  position: relative;
-  animation: pulse 1.5s infinite;
-}
-
-#heartbeat {
-  font-size: 48px;
-  margin: 0;
-}
-
-.pulse {
-  width: 12px;
-  height: 12px;
-  background-color: red;
-  border-radius: 50%;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-/* Botón de logout */
-.logout-button {
-  margin-top: 30px;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: bold;
-  color: #fff;
-  background-color: #e74c3c;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-.logout-button:hover {
-  background-color: #c0392b;
-  transform: scale(1.05);
-}
-
-.logout-button:active {
-  transform: scale(0.98);
-}
-
-.logout-button.small {
-  margin-top: 10px;
-  padding: 8px 16px;
-  font-size: 14px;
-  background-color: #e74c3c;
-  border-radius: 6px;
-  box-shadow: none;
-}
-
-/* Menú hamburguesa */
+/* === MENÚ HAMBURGUESA === */
 .menu-toggle {
   position: fixed;
   top: 20px;
@@ -146,7 +77,6 @@ body {
   to { opacity: 1; }
 }
 
-/* Lista del menú */
 .menu-list {
   list-style: none;
   padding: 0;
@@ -171,7 +101,77 @@ body {
   color: #1abc9c;
 }
 
-/* Animación de secciones */
+/* === CARDIO BOX === */
+.cardio-box {
+  margin-top: 20px;
+  padding: 30px;
+  background-color: #1abc9c;
+  border-radius: 10px;
+  position: relative;
+  animation: pulse 1.5s infinite;
+}
+
+#heartbeat {
+  font-size: 48px;
+  margin: 0;
+}
+
+.pulse {
+  width: 12px;
+  height: 12px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* === BOTÓN LOGOUT === */
+.logout-button {
+  margin-top: 30px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #e74c3c;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+  transform: scale(1.05);
+}
+
+.logout-button:active {
+  transform: scale(0.98);
+}
+
+.logout-button.small {
+  margin-top: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: #e74c3c;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+/* === SECCIONES MODULARES === */
 section {
   opacity: 0;
   transform: translateY(20px);
@@ -185,7 +185,7 @@ section.active {
   transform: translateY(0);
 }
 
-/* ===== Panel de Administrador ===== */
+/* === PANEL ADMINISTRADOR === */
 #adminPanel {
   margin: 40px auto;
   padding: 30px;
@@ -234,7 +234,6 @@ section.active {
   transition: background-color 0.3s ease;
 }
 
-/* Botones dentro del panel admin */
 #adminPanel .action-btn {
   padding: 6px 12px;
   background-color: #1abc9c;
@@ -250,7 +249,7 @@ section.active {
   background-color: #16a085;
 }
 
-/* ===== Responsividad ===== */
+/* === RESPONSIVO === */
 @media (max-width: 768px) {
   .container {
     padding: 20px;
