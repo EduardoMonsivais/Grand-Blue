@@ -2,8 +2,8 @@ const API_BASE_URL = 'https://health-sen.onrender.com';
 const token = localStorage.getItem('token');
 const LOCALE = 'es-MX';
 const TIMEZONE = 'America/Monterrey';
+let bpmChartInstance = null;
 
-// Formatea fecha/hora a la zona local de Monterrey (UTC-6)
 function formatLocal(dateLike) {
   try {
     return new Date(dateLike).toLocaleString(LOCALE, { timeZone: TIMEZONE });
@@ -216,7 +216,12 @@ async function loadChart() {
     const chartCanvas = document.getElementById('bpmChart');
     if (!chartCanvas) return;
 
-    new Chart(chartCanvas, {
+    // Destruir instancia previa si existe (solución al error de Chart.js)
+    if (bpmChartInstance) {
+      bpmChartInstance.destroy();
+    }
+
+    bpmChartInstance = new Chart(chartCanvas, {
       type: 'line',
       data: {
         labels,
